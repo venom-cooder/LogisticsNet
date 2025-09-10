@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Dashboard - Logistics Net</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Global Styles & Resets --- */
+        :root {
+            --bg-color: #00000a;
+            --nav-bg: rgba(10, 10, 20, 0.5);
+            --card-bg: rgba(20, 20, 35, 0.6);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --primary-blue: #00aaff;
+            --text-primary: #ffffff;
+            --text-secondary: #a9a9b3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* --- 3D Background Canvas --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* --- Layout --- */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--nav-bg);
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(15px);
+            z-index: 100;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            height: 70px;
+        }
+
+        .main-container {
+            padding: 100px 3rem 2rem;
+            overflow-y: auto;
+        }
+
+        /* --- Top Navigation Styles --- */
+        .nav-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        .nav-logo span {
+            color: var(--primary-blue);
+        }
+        .nav-links {
+            display: flex;
+            margin-left: 3rem;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0 1.5rem;
+            font-weight: 600;
+            line-height: 70px;
+            border-bottom: 3px solid transparent;
+            transition: color 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+        }
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+        .nav-links a.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--primary-blue);
+        }
+        .nav-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Main Content Header --- */
+        .main-header {
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .main-header h1 {
+            font-size: 2.25rem;
+        }
+        
+        /* --- Page Content Styling --- */
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Dashboard Grid --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+
+        .main-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            background-color: var(--primary-blue);
+        }
+        .btn:hover { background-color: #0088cc; }
+
+        /* --- New Shipment Planner --- */
+        .planner-grid {
+            grid-column: span 12;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .planner-step {
+            margin-bottom: 1rem;
+        }
+        .planner-step h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .choice-card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .choice-card {
+            background: rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        .choice-card:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+        .choice-card.active {
+            border-color: var(--primary-blue);
+        }
+        .choice-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-group {
+            margin-bottom: 1rem;
+        }
+         .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .suggestion-panel {
+             grid-column: span 12;
+             text-align: center;
+        }
+        .suggestion-card {
+            background: rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            border-left: 4px solid var(--primary-blue);
+            text-align: left;
+        }
+
+        /* --- Generic Table Styles --- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .data-table .table-logo {
+            height: 25px;
+            vertical-align: middle;
+        }
+        .map-btn {
+            background: none;
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <header class="top-nav">
+        <a href="#" class="nav-logo">Logistics<span>Net</span></a>
+        <nav class="nav-links">
+            <a data-page="new" class="active">New Shipment</a>
+            <a data-page="ongoing">Ongoing</a>
+            <a data-page="history">History</a>
+        </nav>
+        <div class="nav-actions">
+            <a href="index.html" class="logout-btn">Log Out</a>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- ===== New Shipment Page ===== -->
+        <div id="new-page" class="page-content active">
+            <header class="main-header">
+                <h1>Create a New Shipment</h1>
+            </header>
+            <div class="dashboard-grid">
+                <div class="main-panel planner-grid">
+                    <div class="planner-step">
+                        <h3>1. Where are you sending?</h3>
+                        <div class="choice-card-grid">
+                            <div class="choice-card active">
+                                <div class="icon">🇮🇳</div>
+                                <div>Within India</div>
+                            </div>
+                            <div class="choice-card">
+                                <div class="icon">🌍</div>
+                                <div>International</div>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="planner-step">
+                        <h3>2. How should it travel?</h3>
+                        <div class="choice-card-grid">
+                            <div class="choice-card active">
+                                <div class="icon">🚚</div>
+                                <div>By Road</div>
+                            </div>
+                            <div class="choice-card">
+                                <div class="icon">✈️</div>
+                                <div>By Air</div>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="planner-step">
+                        <h3>3. What's most important?</h3>
+                         <div class="choice-card-grid">
+                            <div class="choice-card active">
+                                <div class="icon">💰</div>
+                                <div>Lowest Cost</div>
+                            </div>
+                            <div class="choice-card">
+                                <div class="icon">⚡️</div>
+                                <div>Fastest</div>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="main-panel" style="grid-column: span 3;">
+                         <h3>4. Consignment Details</h3>
+                         <div class="input-group">
+                             <label>Origin</label>
+                             <input type="text" value="Jabalpur">
+                         </div>
+                          <div class="input-group">
+                             <label>Destination</label>
+                             <input type="text" value="Indore">
+                         </div>
+                          <div class="input-group">
+                             <label>Approx. Weight (kg)</label>
+                             <input type="number" value="5">
+                         </div>
+                     </div>
+                </div>
+
+                 <div class="main-panel suggestion-panel">
+                     <button class="btn" style="padding: 15px 40px; font-size: 1.2rem;">Find My Best Option</button>
+                     <div class="suggestion-card">
+                        <h4>Our Recommendation: Blue Dart</h4>
+                        <p>Based on your preferences for low-cost road travel, Blue Dart offers the most competitive rate for a 5kg parcel from Jabalpur to Indore.</p>
+                    </div>
+                     <div class="suggestion-card" style="border-left-color: #f9a825;">
+                        <h4>Want to save even more? Connect with a Local Vendor!</h4>
+                        <p>For non-urgent deliveries, local truck owners on our platform can offer lower prices. This is a direct, commission-free connection facilitated by us to help the community.</p>
+                        <button class="btn" style="margin-top: 1rem; background-color: #f9a825;">Find Local Vendors</button>
+                    </div>
+                 </div>
+            </div>
+        </div>
+        
+        <!-- ===== Ongoing Shipments Page ===== -->
+        <div id="ongoing-page" class="page-content">
+            <header class="main-header"><h1>Ongoing Shipments</h1></header>
+            <div class="main-panel">
+                 <table class="data-table">
+                    <thead><tr><th>ID</th><th>Provider</th><th>Route</th><th>Status</th><th>Track</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>#P-451</td>
+                            <td><img src="https://logo.clearbit.com/bluedart.com" class="table-logo" onerror="this.style.display='none'"> Blue Dart</td>
+                            <td>Jabalpur to Indore</td>
+                            <td>In Transit</td>
+                            <td><button class="map-btn">Track on Map</button></td>
+                        </tr>
+                    </tbody>
+                 </table>
+            </div>
+        </div>
+
+        <!-- ===== History Page ===== -->
+        <div id="history-page" class="page-content">
+             <header class="main-header"><h1>Shipment History</h1></header>
+            <div class="main-panel">
+                 <table class="data-table">
+                    <thead><tr><th>ID</th><th>Provider</th><th>Route</th><th>Date</th><th>Cost</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>#P-398</td>
+                            <td><img src="https://logo.clearbit.com/delhivery.com" class="table-logo" onerror="this.style.display='none'"> Delhivery</td>
+                            <td>Jabalpur to Bhopal</td>
+                            <td>15 Aug 2025</td>
+                            <td>₹250</td>
+                        </tr>
+                         <tr>
+                            <td>#P-381</td>
+                            <td><img src="https://logo.clearbit.com/fedex.com" class="table-logo" onerror="this.style.display='none'"> FedEx</td>
+                            <td>Jabalpur to USA</td>
+                            <td>02 Jul 2025</td>
+                            <td>₹4500</td>
+                        </tr>
+                    </tbody>
+                 </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- JS Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script type="module">
+        // --- 3D Background Setup ---
+        const canvas = document.getElementById('bg-canvas');
+        let scene, camera, renderer, particleSystem;
+        const movingObjects = [];
+
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 50;
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            
+            const particleCount = 2000;
+            const particles = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i++) {
+                const theta = Math.random() * 2 * Math.PI;
+                const phi = Math.acos((Math.random() * 2) - 1);
+                const radius = 10 + Math.random() * 80;
+                positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i*3+1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i*3+2] = radius * Math.cos(phi);
+            }
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMaterial = new THREE.PointsMaterial({ color: 0x00aaff, size: 0.2, transparent: true, opacity: 0.4 });
+            particleSystem = new THREE.Points(particles, particleMaterial);
+            scene.add(particleSystem);
+            
+            for(let i=0; i < 4; i++) createMovingObject('truck');
+            for(let i=0; i < 4; i++) createMovingObject('airplane');
+
+            window.addEventListener('resize', () => {
+                 camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            animate3D();
+        }
+
+        function createMovingObject(type) {
+            const group = new THREE.Group();
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 });
+            if (type === 'truck') {
+                const cab = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 1), material); cab.position.x = 1;
+                const trailer = new THREE.Mesh(new THREE.BoxGeometry(3, 1.2, 1), material); trailer.position.x = -1.5;
+                group.add(cab, trailer);
+            } else {
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0, 0.8, 6, 8), material); body.rotation.z = Math.PI / 2;
+                const wing = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.3, 9), material);
+                group.add(body, wing);
+            }
+            group.position.x = window.innerWidth / 10 + Math.random() * 50;
+            group.position.y = (Math.random() - 0.5) * (window.innerHeight / 5);
+            group.position.z = (Math.random() - 0.5) * 40;
+            group.speed = 0.1 + Math.random() * 0.2;
+            scene.add(group);
+            movingObjects.push(group);
+        }
+
+        const clock = new THREE.Clock();
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            const elapsedTime = clock.getElapsedTime();
+            if(particleSystem) particleSystem.rotation.y = -elapsedTime * 0.03;
+            movingObjects.forEach(obj => {
+                obj.position.x -= obj.speed;
+                if (obj.position.x < -window.innerWidth / 10) obj.position.x = window.innerWidth / 10;
+            });
+            renderer.render(scene, camera);
+        }
+        init3D();
+        
+        // --- Page Navigation Logic ---
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const pages = document.querySelectorAll('.page-content');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const pageId = link.dataset.page;
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                pages.forEach(page => page.classList.toggle('active', page.id === `${pageId}-page`));
+            });
+        });
+
+        // --- Planner Choice Logic ---
+        document.querySelectorAll('.choice-card-grid').forEach(grid => {
+            grid.addEventListener('click', (e) => {
+                const card = e.target.closest('.choice-card');
+                if (!card) return;
+                grid.querySelectorAll('.choice-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+            });
+        });
+
+    </script>
+</body>
+</html>

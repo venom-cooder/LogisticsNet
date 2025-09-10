@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Logistics Net</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Global Styles & Resets --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #00000a;
+            color: #ffffff;
+            overflow: hidden; /* Prevent scrollbars during transitions */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- 3D Background Canvas --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* --- Main Container --- */
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            perspective: 1000px;
+        }
+
+        .panel {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(10, 10, 20, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            padding: 3rem;
+            position: absolute;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease;
+            will-change: transform, opacity;
+        }
+
+        /* --- Role Selection Panel --- */
+        #role-selection-panel {
+            transform: rotateY(0deg) scale(1);
+            opacity: 1;
+            z-index: 10;
+        }
+
+        #role-selection-panel.hidden {
+            transform: rotateY(-30deg) scale(0.9);
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .panel-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .panel-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .panel-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+        
+        .role-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .role-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2rem 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-decoration: none;
+            color: #fff;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .role-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #00aaff;
+            box-shadow: 0 10px 30px rgba(0, 170, 255, 0.2);
+        }
+
+        .role-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .role-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .role-card p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* --- Form Panels --- */
+        .form-panel {
+            max-width: 550px; /* Smaller width for forms */
+            transform: rotateY(30deg) scale(0.9);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .form-panel.active {
+            transform: rotateY(0deg) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+            transition: color 0.3s ease;
+        }
+        .back-button:hover {
+            color: #fff;
+        }
+
+        /* --- Form Elements --- */
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #00aaff;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+        }
+        
+        /* --- Buttons --- */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+            background-color: #00aaff;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            background-color: #0088cc;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #00aaff;
+        }
+        
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Multi-step form styles */
+        .form-step {
+            display: none;
+        }
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.5s 0.3s backwards;
+        }
+        
+        .tab-content {
+             display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Generic Login/Signup Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: color 0.3s ease, border-bottom 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            color: #fff;
+            border-bottom-color: #00aaff;
+        }
+        
+        .home-link {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            background: rgba(0, 0, 10, 0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            z-index: 20;
+        }
+        .home-link:hover {
+            color: #fff;
+        }
+
+        /* Message display for errors/success */
+        .message {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: none; /* Hidden by default */
+        }
+        .message.error {
+            background-color: rgba(211, 47, 47, 0.3);
+            color: #ffcdd2;
+        }
+        .message.success {
+            background-color: rgba(67, 160, 71, 0.3);
+            color: #c8e6c9;
+        }
+
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="main-container">
+
+        <!-- Role Selection Panel -->
+        <div id="role-selection-panel" class="panel">
+            <div class="panel-header">
+                <h1>Join the Network</h1>
+                <p>Select your role to get started.</p>
+            </div>
+            <div class="role-selection-grid">
+                <div class="role-card" data-form="startup-form">
+                    <div class="role-icon">🚚</div>
+                    <h3>Logistics Startup</h3>
+                    <p>Register your company to reach a new market of customers.</p>
+                </div>
+                <div class="role-card" data-form="business-form">
+                    <div class="role-icon">🏢</div>
+                    <h3>Business User</h3>
+                    <p>Optimize your supply chain, save costs, and manage shipments.</p>
+                </div>
+                <div class="role-card" data-form="customer-form">
+                    <div class="role-icon">📦</div>
+                    <h3>Personal Shipment</h3>
+                    <p>Send items locally with our free peer-to-peer vendor connection.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Startup Form Panel -->
+        <div id="startup-form" class="panel form-panel">
+            <button class="back-button js-back-to-roles">←</button>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="signup">Sign Up</button>
+                <button class="tab-button" data-tab="login">Log In</button>
+            </div>
+            <!-- Startup Signup Content -->
+            <div class="tab-content active" data-tab-content="signup">
+                <div class="panel-header"><h1>Register Your Startup</h1></div>
+                <div class="message"></div>
+                <form class="signup-form" data-dashboard="startup_dashboard.html">
+                    <div class="form-step active" data-step="1">
+                        <div class="input-group"><label for="company-name">Company Name</label><input type="text" id="company-name" required></div>
+                        <div class="input-group"><label for="op-years">Years in Operation</label><input type="number" id="op-years" min="0" required></div>
+                        <button type="button" class="btn js-next-step">Next</button>
+                    </div>
+                    <div class="form-step" data-step="2">
+                        <div class="input-group"><label for="fleet-size">Fleet Size</label><select id="fleet-size" required><option value="1-10">1-10 Vehicles</option><option value="11-50">11-50 Vehicles</option><option value="50+">50+ Vehicles</option></select></div>
+                         <div class="input-group"><label for="service-area">Primary Area of Service</label><input type="text" id="service-area" placeholder="e.g., Gujarat, Pan-India" required></div>
+                        <div class="button-group"><button type="button" class="btn btn-secondary js-prev-step">Back</button><button type="button" class="btn js-next-step">Next</button></div>
+                    </div>
+                    <div class="form-step" data-step="3">
+                        <div class="input-group"><label for="startup-email-signup">Email</label><input type="email" class="email-input" id="startup-email-signup" required></div>
+                        <div class="input-group"><label for="startup-password-signup">Create Password</label><input type="password" id="startup-password-signup" required></div>
+                         <div class="input-group"><label for="startup-password-confirm">Confirm Password</label><input type="password" id="startup-password-confirm" required></div>
+                        <div class="button-group"><button type="button" class="btn btn-secondary js-prev-step">Back</button><button type="button" class="btn js-send-otp">Send OTP</button></div>
+                    </div>
+                     <div class="form-step" data-step="4">
+                         <div class="input-group"><label for="startup-otp">Verification Code</label><input type="text" id="startup-otp" required placeholder="Enter 6-digit OTP"></div>
+                        <button type="submit" class="btn">Verify & Register</button>
+                     </div>
+                </form>
+            </div>
+             <!-- Startup Login Content -->
+            <div class="tab-content" data-tab-content="login">
+                <div class="panel-header"><h1>Startup Login</h1></div>
+                <form class="login-form" data-dashboard="startup_dashboard.html">
+                     <div class="input-group"><label for="startup-email-login">Email</label><input type="email" id="startup-email-login" required></div>
+                    <div class="input-group"><label for="startup-password-login">Password</label><input type="password" id="startup-password-login" required></div>
+                    <button type="submit" class="btn">Log In</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Business Form Panel -->
+        <div id="business-form" class="panel form-panel">
+            <button class="back-button js-back-to-roles">←</button>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="signup">Sign Up</button>
+                <button class="tab-button" data-tab="login">Log In</button>
+            </div>
+             <!-- Business Signup Content -->
+            <div class="tab-content active" data-tab-content="signup">
+                <div class="panel-header"><h1>Business User Signup</h1></div>
+                <div class="message"></div>
+                <form class="signup-form" data-dashboard="business_dashboard.html">
+                     <div class="form-step active" data-step="1">
+                        <div class="input-group"><label for="business-name">Your Company's Name</label><input type="text" id="business-name" required></div>
+                        <div class="input-group"><label for="business-type">Type of Business</label><input type="text" id="business-type" placeholder="e.g., E-commerce, Manufacturing" required></div>
+                        <button type="button" class="btn js-next-step">Next</button>
+                    </div>
+                     <div class="form-step" data-step="2">
+                        <div class="input-group"><label for="company-size">Company Size</label><select id="company-size" required><option value="1-10">1-10 Employees</option><option value="11-50">11-50 Employees</option><option value="51-200">51-200 Employees</option><option value="200+">200+ Employees</option></select></div>
+                         <div class="input-group"><label for="shipment-volume">Average Monthly Shipments</label><input type="number" id="shipment-volume" min="0" required></div>
+                         <div class="button-group"><button type="button" class="btn btn-secondary js-prev-step">Back</button><button type="button" class="btn js-next-step">Next</button></div>
+                    </div>
+                     <div class="form-step" data-step="3">
+                        <div class="input-group"><label for="business-email-signup">Work Email</label><input type="email" class="email-input" id="business-email-signup" required></div>
+                        <div class="input-group"><label for="business-password-signup">Create Password</label><input type="password" id="business-password-signup" required></div>
+                        <div class="input-group"><label for="business-password-confirm">Confirm Password</label><input type="password" id="business-password-confirm" required></div>
+                        <div class="button-group"><button type="button" class="btn btn-secondary js-prev-step">Back</button><button type="button" class="btn js-send-otp">Send OTP</button></div>
+                    </div>
+                     <div class="form-step" data-step="4">
+                         <div class="input-group"><label for="business-otp">Verification Code</label><input type="text" id="business-otp" required placeholder="Enter 6-digit OTP"></div>
+                        <button type="submit" class="btn">Verify & Sign Up</button>
+                     </div>
+                </form>
+            </div>
+             <!-- Business Login Content -->
+            <div class="tab-content" data-tab-content="login">
+                 <div class="panel-header"><h1>Business Login</h1></div>
+                 <form class="login-form" data-dashboard="business_dashboard.html">
+                    <div class="input-group"><label for="business-email-login">Work Email</label><input type="email" id="business-email-login" required></div>
+                    <div class="input-group"><label for="business-password-login">Password</label><input type="password" id="business-password-login" required></div>
+                    <button type="submit" class="btn">Log In</button>
+                 </form>
+            </div>
+        </div>
+        
+        <!-- Customer Form Panel -->
+        <div id="customer-form" class="panel form-panel">
+            <button class="back-button js-back-to-roles">←</button>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="login">Log In</button>
+                <button class="tab-button" data-tab="signup">Sign Up</button>
+            </div>
+             <!-- Customer Login Content -->
+            <div class="tab-content active" data-tab-content="login">
+                <div class="panel-header"><h1>Welcome Back</h1></div>
+                <div class="message"></div>
+                <form class="login-form" data-dashboard="personal_dashboard.html">
+                    <div class="input-group"><label for="login-email">Email</label><input type="email" id="login-email" required></div>
+                    <div class="input-group"><label for="login-password">Password</label><input type="password" id="login-password" required></div>
+                    <button type="submit" class="btn">Log In</button>
+                </form>
+            </div>
+             <!-- Customer Signup Content -->
+            <div class="tab-content" data-tab-content="signup">
+                <div class="panel-header"><h1>Create Account</h1></div>
+                <div class="message"></div>
+                <form class="signup-form" data-dashboard="personal_dashboard.html">
+                    <div class="form-step active" data-step="1">
+                        <div class="input-group"><label for="signup-name">Full Name</label><input type="text" id="signup-name" required></div>
+                        <div class="input-group"><label for="signup-email">Email</label><input type="email" class="email-input" id="signup-email" required></div>
+                         <div class="input-group"><label for="signup-password">Create Password</label><input type="password" id="signup-password" required></div>
+                        <div class="input-group"><label for="signup-password-confirm">Confirm Password</label><input type="password" id="signup-password-confirm" required></div>
+                        <button type="button" class="btn js-send-otp">Send OTP</button>
+                    </div>
+                    <div class="form-step" data-step="2">
+                         <div class="input-group"><label for="customer-otp">Verification Code</label><input type="text" id="customer-otp" required placeholder="Enter 6-digit OTP"></div>
+                        <button type="submit" class="btn">Verify & Create Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    <a href="index.html" class="home-link">← Back to Home</a>
+    
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script type="module">
+        // --- 3D Background Setup ---
+        const canvas = document.getElementById('bg-canvas');
+        let scene, camera, renderer, particleSystem;
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 50;
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            const particleCount = 5000;
+            const particles = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i++) {
+                const theta = Math.random() * 2 * Math.PI;
+                const phi = Math.acos((Math.random() * 2) - 1);
+                const radius = 20 + Math.random() * 60;
+                positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i*3+1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i*3+2] = radius * Math.cos(phi);
+            }
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMaterial = new THREE.PointsMaterial({
+                color: 0x00aaff,
+                size: 0.2,
+                transparent: true,
+                opacity: 0.6
+            });
+            particleSystem = new THREE.Points(particles, particleMaterial);
+            scene.add(particleSystem);
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            animate3D();
+        }
+        const clock = new THREE.Clock();
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            const elapsedTime = clock.getElapsedTime();
+            if(particleSystem) particleSystem.rotation.y = -elapsedTime * 0.05;
+            renderer.render(scene, camera);
+        }
+        init3D();
+
+        // --- UI & Form Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const roleSelectionPanel = document.getElementById('role-selection-panel');
+            const roleCards = document.querySelectorAll('.role-card');
+            const formPanels = document.querySelectorAll('.form-panel');
+            const backButtons = document.querySelectorAll('.js-back-to-roles');
+            
+            const BACKEND_URL = 'http://localhost:3000';
+
+            // --- Panel Switching Logic ---
+            roleCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const formId = card.dataset.form;
+                    const formToShow = document.getElementById(formId);
+                    roleSelectionPanel.classList.add('hidden');
+                    if(formToShow) {
+                       formToShow.classList.add('active');
+                    }
+                });
+            });
+
+            backButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const currentForm = button.closest('.form-panel');
+                    currentForm.classList.remove('active');
+                    // Reset forms when going back
+                    currentForm.querySelectorAll('form').forEach(form => form.reset());
+                    currentForm.querySelectorAll('.form-step').forEach((step, index) => {
+                         if (step.closest('.signup-form')) {
+                            step.classList.toggle('active', step.dataset.step === '1');
+                         }
+                    });
+                     // Reset tabs to default state
+                    currentForm.querySelectorAll('.tab-button').forEach((btn, index) => btn.classList.toggle('active', index === 0));
+                    currentForm.querySelectorAll('.tab-content').forEach((content, index) => content.classList.toggle('active', index === 0));
+
+                    roleSelectionPanel.classList.remove('hidden');
+                });
+            });
+
+            // --- Multi-step form navigation ---
+            document.querySelectorAll('.js-next-step').forEach(button => {
+                button.addEventListener('click', (e) => navigateStep(e.target, 1));
+            });
+
+            document.querySelectorAll('.js-prev-step').forEach(button => {
+                button.addEventListener('click', (e) => navigateStep(e.target, -1));
+            });
+            
+            function navigateStep(button, direction) {
+                const currentStep = button.closest('.form-step');
+                const nextStep = direction === 1 ? currentStep.nextElementSibling : currentStep.previousElementSibling;
+                if (nextStep && nextStep.classList.contains('form-step')) {
+                    currentStep.classList.remove('active');
+                    nextStep.classList.add('active');
+                }
+            }
+            
+            // --- Tab Switching Logic (for all forms) ---
+            formPanels.forEach(panel => {
+                const tabButtons = panel.querySelectorAll('.tab-button');
+                const tabContents = panel.querySelectorAll('.tab-content');
+                if (tabButtons.length > 0) {
+                    tabButtons.forEach(button => {
+                        button.addEventListener('click', () => {
+                            tabButtons.forEach(btn => btn.classList.remove('active'));
+                            button.classList.add('active');
+                            const tabId = button.dataset.tab;
+                            tabContents.forEach(content => {
+                                content.classList.toggle('active', content.dataset.tabContent === tabId);
+                            });
+                        });
+                    });
+                }
+            });
+
+            // --- OTP Sending Logic ---
+            document.querySelectorAll('.js-send-otp').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const form = e.target.closest('form');
+                    const emailInput = form.querySelector('.email-input');
+                    const messageEl = form.closest('.tab-content').querySelector('.message');
+                    
+                    const passInput = form.querySelector('input[type="password"]:not([id*="confirm"])');
+                    const confirmPassInput = form.querySelector('input[id*="confirm"]');
+                    if(passInput.value !== confirmPassInput.value) {
+                         showMessage(messageEl, 'Passwords do not match.', 'error');
+                         return;
+                    }
+                    if(passInput.value.length < 6) {
+                        showMessage(messageEl, 'Password must be at least 6 characters.', 'error');
+                        return;
+                    }
+
+                    button.disabled = true;
+                    button.textContent = 'Sending...';
+                    
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/send-otp`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: emailInput.value })
+                        });
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.message);
+                        
+                        showMessage(messageEl, data.message, 'success');
+                        navigateStep(e.target, 1);
+
+                    } catch (error) {
+                        showMessage(messageEl, error.message || 'An error occurred.', 'error');
+                    } finally {
+                        button.disabled = false;
+                        button.textContent = 'Send OTP';
+                    }
+                });
+            });
+
+            // --- OTP Verification & Signup Logic ---
+            document.querySelectorAll('form.signup-form').forEach(form => {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const button = form.querySelector('button[type="submit"]');
+                    const emailInput = form.querySelector('.email-input');
+                    const otpInput = form.querySelector('input[id*="otp"]');
+                    const messageEl = form.closest('.tab-content').querySelector('.message');
+                    const dashboardPage = form.dataset.dashboard;
+
+                    button.disabled = true;
+                    button.textContent = 'Verifying...';
+
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/verify-otp`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: emailInput.value, otp: otpInput.value })
+                        });
+                        const data = await response.json();
+                         if (!response.ok) throw new Error(data.message);
+                        
+                        // OTP Verified, now redirect to the correct dashboard
+                        window.location.href = dashboardPage;
+
+                    } catch (error) {
+                        showMessage(messageEl, error.message || 'An error occurred.', 'error');
+                        button.disabled = false;
+                        button.textContent = button.textContent.replace('Verifying...', 'Verify');
+                    }
+                });
+            });
+
+             // --- Login Logic (Simulation) ---
+             document.querySelectorAll('form.login-form').forEach(form => {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    // In a real app, you'd verify credentials with the backend.
+                    // Here, we just redirect to the correct dashboard for the prototype.
+                    const dashboardPage = form.dataset.dashboard;
+                    window.location.href = dashboardPage;
+                });
+             });
+
+            function showMessage(element, text, type) {
+                if (!element) return;
+                element.className = 'message';
+                element.classList.add(type);
+                element.textContent = text;
+                element.style.display = 'block';
+                 setTimeout(() => {
+                    element.style.display = 'none';
+                 }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>

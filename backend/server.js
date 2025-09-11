@@ -1,5 +1,4 @@
 // 1. Configure Environment Variables
-// This line should be at the very top. It loads the variables for local development.
 require('dotenv').config();
 
 // 2. Import Dependencies
@@ -15,80 +14,70 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- MongoDB Connection ---
-// This will now use the variable from Render's environment.
 const MONGO_URI = process.env.MONGO_URI;
 
-// --- Email Transporter Configuration for Gmail ---
-// This is now securely configured to use environment variables for your Gmail credentials.
+// --- Email Transporter Configuration (Gmail + App Password) ---
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   host: 'smtp.gmail.com',
   port: 465,
   secure: true,
   auth: {
-    user: process.env.GMAIL_USER, // Reads your Gmail address from Render's environment
-    pass: process.env.GMAIL_APP_PASS,   // Reads your 16-digit App Password from Render's environment
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASS,
   },
 });
 
-
 // 5. Middleware Setup
-// --- CORS ERROR FIX ---
-// This is the correction for the CORS error. It tells your backend to only
-// accept requests from your live Vercel frontend.
+// Allow both local and deployed frontend
 const corsOptions = {
-  // IMPORTANT: Replace this placeholder with your actual Vercel frontend URL
-  origin: 'https://YOUR_FRONTEND_URL.vercel.app', 
-  optionsSuccessStatus: 200 
+  origin: [
+    'http://localhost:3000',             // for local testing
+    'https://logistics-net-frontend.vercel.app' // replace with your actual Vercel frontend URL
+  ],
+  optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 app.use(express.json());
 
-
 // 6. Database Connection
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('Successfully connected to MongoDB.'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => console.log('✅ Successfully connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // 7. Mongoose Schema for OTP
 const otpSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-  },
-  otp: {
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    expires: 300, // The document will be automatically deleted after 5 minutes
-  },
+  email: { type: String, required: true },
+  otp: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now, expires: 300 }, // auto delete after 5 mins
 });
 
 const Otp = mongoose.model('Otp', otpSchema);
 
-
 // 8. API Routes
 app.get('/', (req, res) => {
-  res.send('Welcome to the Logistics Net Backend!');
+  res.json({ message: 'Welcome to the Logistics Net Backend!' });
 });
 
-// --- Add this route to prevent the favicon.ico 404 error ---
+// prevent favicon 404
 app.get('/favicon.ico', (req, res) => res.status(204).send());
 
-// --- OTP Generation and Sending Route ---
+// --- OTP Generation and Sending ---
 app.post('/api/send-otp', async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required.' });
-    }
+    if (!email) return res.status(400).json({ message: 'Email is required.' });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await Otp.findOneAndUpdate({ email }, { otp }, { upsert: true, new: true, setDefaultsOnInsert: true });
+    await Otp.findOneAndUpdate(
+      { email },
+      { otp },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
 
     const mailOptions = {
       from: `"Logistics Net" <${process.env.GMAIL_USER}>`,
@@ -98,45 +87,41 @@ app.post('/api/send-otp', async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('OTP Email sent to: ' + email);
-    
-    res.status(200).json({ message: 'OTP sent successfully to your email.' });
+    console.log(`📧 OTP Email sent to: ${email}`);
 
+    res.status(200).json({ message: 'OTP sent successfully to your email.' });
   } catch (error) {
-    console.error('Error sending OTP:', error);
-    res.status(500).json({ message: 'Failed to send OTP. Please check server logs.' });
+    console.error('❌ Error sending OTP:', error);
+    res.status(500).json({ message: 'Failed to send OTP. Please try again later.' });
   }
 });
 
-// --- OTP Verification Route ---
+// --- OTP Verification ---
 app.post('/api/verify-otp', async (req, res) => {
-    try {
-        const { email, otp } = req.body;
-        if (!email || !otp) {
-            return res.status(400).json({ message: 'Email and OTP are required.' });
-        }
-
-        const otpRecord = await Otp.findOne({ email });
-
-        if (!otpRecord) {
-            return res.status(400).json({ message: 'Invalid OTP or OTP has expired.' });
-        }
-
-        if (otpRecord.otp === otp) {
-            await Otp.deleteOne({ email });
-            res.status(200).json({ message: 'Email verified successfully.' });
-        } else {
-            res.status(400).json({ message: 'Invalid OTP. Please check and try again.' });
-        }
-
-    } catch (error) {
-        console.error('Error verifying OTP:', error);
-        res.status(500).json({ message: 'Failed to verify OTP. Please try again later.' });
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ message: 'Email and OTP are required.' });
     }
-});
 
+    const otpRecord = await Otp.findOne({ email });
+    if (!otpRecord) {
+      return res.status(400).json({ message: 'Invalid OTP or OTP has expired.' });
+    }
+
+    if (otpRecord.otp === otp) {
+      await Otp.deleteOne({ email });
+      res.status(200).json({ message: 'Email verified successfully.' });
+    } else {
+      res.status(400).json({ message: 'Invalid OTP. Please try again.' });
+    }
+  } catch (error) {
+    console.error('❌ Error verifying OTP:', error);
+    res.status(500).json({ message: 'Failed to verify OTP. Please try again later.' });
+  }
+});
 
 // 9. Start the Server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });

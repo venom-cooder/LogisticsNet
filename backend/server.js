@@ -33,7 +33,15 @@ const transporter = nodemailer.createTransport({
 
 
 // 5. Middleware Setup
-app.use(cors());
+// --- CORS ERROR FIX ---
+// This is the correction for the CORS error. It tells your backend to only
+// accept requests from your live Vercel frontend.
+const corsOptions = {
+  // IMPORTANT: Replace this placeholder with your actual Vercel frontend URL
+  origin: 'https://YOUR_FRONTEND_URL.vercel.app', 
+  optionsSuccessStatus: 200 
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 

@@ -478,6 +478,28 @@
         // --- 3D Background Setup ---
         const canvas = document.getElementById('bg-canvas');
         let scene, camera, renderer, particleSystem;
+        const movingObjects = [];
+
+        function createMovingObject(type) {
+             const group = new THREE.Group();
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 });
+            if (type === 'truck') {
+                const cab = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 1), material); cab.position.x = 1;
+                const trailer = new THREE.Mesh(new THREE.BoxGeometry(3, 1.2, 1), material); trailer.position.x = -1.5;
+                group.add(cab, trailer);
+            } else {
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0, 0.8, 6, 8), material); body.rotation.z = Math.PI / 2;
+                const wing = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.3, 9), material);
+                group.add(body, wing);
+            }
+            group.position.x = window.innerWidth / 10 + Math.random() * 50;
+            group.position.y = (Math.random() - 0.5) * (window.innerHeight / 5);
+            group.position.z = (Math.random() - 0.5) * 40;
+            group.speed = 0.1 + Math.random() * 0.2;
+            scene.add(group);
+            movingObjects.push(group);
+        }
+        
         function init3D() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -485,13 +507,13 @@
             renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            const particleCount = 5000;
+            const particleCount = 2000;
             const particles = new THREE.BufferGeometry();
             const positions = new Float32Array(particleCount * 3);
             for (let i = 0; i < particleCount * 3; i++) {
                 const theta = Math.random() * 2 * Math.PI;
                 const phi = Math.acos((Math.random() * 2) - 1);
-                const radius = 20 + Math.random() * 60;
+                const radius = 20 + Math.random() * 80;
                 positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
                 positions[i*3+1] = radius * Math.sin(phi) * Math.sin(theta);
                 positions[i*3+2] = radius * Math.cos(phi);
@@ -501,10 +523,14 @@
                 color: 0x00aaff,
                 size: 0.2,
                 transparent: true,
-                opacity: 0.6
+                opacity: 0.4
             });
             particleSystem = new THREE.Points(particles, particleMaterial);
             scene.add(particleSystem);
+            
+            for(let i=0; i < 4; i++) createMovingObject('truck');
+            for(let i=0; i < 4; i++) createMovingObject('airplane');
+
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
@@ -516,7 +542,11 @@
         function animate3D() {
             requestAnimationFrame(animate3D);
             const elapsedTime = clock.getElapsedTime();
-            if(particleSystem) particleSystem.rotation.y = -elapsedTime * 0.05;
+            if(particleSystem) particleSystem.rotation.y = -elapsedTime * 0.03;
+            movingObjects.forEach(obj => {
+                obj.position.x -= obj.speed;
+                if (obj.position.x < -window.innerWidth / 10) obj.position.x = window.innerWidth / 10;
+            });
             renderer.render(scene, camera);
         }
         init3D();
@@ -528,7 +558,7 @@
             const formPanels = document.querySelectorAll('.form-panel');
             const backButtons = document.querySelectorAll('.js-back-to-roles');
             
-            const BACKEND_URL = 'https://logistics-net-backend.onrender.com';
+            const BACKEND_URL = 'http://localhost:3000';
 
             // --- Panel Switching Logic ---
             roleCards.forEach(card => {
@@ -546,17 +576,14 @@
                 button.addEventListener('click', () => {
                     const currentForm = button.closest('.form-panel');
                     currentForm.classList.remove('active');
-                    // Reset forms when going back
                     currentForm.querySelectorAll('form').forEach(form => form.reset());
                     currentForm.querySelectorAll('.form-step').forEach((step, index) => {
                          if (step.closest('.signup-form')) {
                             step.classList.toggle('active', step.dataset.step === '1');
                          }
                     });
-                     // Reset tabs to default state
                     currentForm.querySelectorAll('.tab-button').forEach((btn, index) => btn.classList.toggle('active', index === 0));
                     currentForm.querySelectorAll('.tab-content').forEach((content, index) => content.classList.toggle('active', index === 0));
-
                     roleSelectionPanel.classList.remove('hidden');
                 });
             });
@@ -579,7 +606,7 @@
                 }
             }
             
-            // --- Tab Switching Logic (for all forms) ---
+            // --- Tab Switching Logic ---
             formPanels.forEach(panel => {
                 const tabButtons = panel.querySelectorAll('.tab-button');
                 const tabContents = panel.querySelectorAll('.tab-content');
@@ -661,7 +688,6 @@
                         const data = await response.json();
                          if (!response.ok) throw new Error(data.message);
                         
-                        // OTP Verified, now redirect to the correct dashboard
                         window.location.href = dashboardPage;
 
                     } catch (error) {
@@ -672,12 +698,11 @@
                 });
             });
 
-             // --- Login Logic (Simulation) ---
+             // --- Login Logic ---
              document.querySelectorAll('form.login-form').forEach(form => {
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    // In a real app, you'd verify credentials with the backend.
-                    // Here, we just redirect to the correct dashboard for the prototype.
+                    // This is a prototype; in a real app, you would verify credentials here.
                     const dashboardPage = form.dataset.dashboard;
                     window.location.href = dashboardPage;
                 });

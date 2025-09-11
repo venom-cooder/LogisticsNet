@@ -20,13 +20,15 @@ const MONGO_URI = 'mongodb://localhost:27017/logistics_net';
 // --- Email Transporter Configuration ---
 // UPDATED: I have replaced the .env variables with the credentials you provided.
 // This will fix the '535 Authentication failed' error.
+// --- Email Transporter Configuration for Gmail ---
 const transporter = nodemailer.createTransport({
-  host: 'smtp.ethereal.email',
-  port: 587,
-  secure: false, 
+  service: 'gmail', // Use the built-in Gmail service
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Use SSL
   auth: {
-    user: 'alphonso.bayer@ethereal.email', // Your actual Ethereal username
-    pass: 'r4YFma77C7SxdRqmFM'  // Your actual Ethereal password
+    user: 'pavitradurgeshp@gmail.com', // Your full Gmail address
+    pass: 'ioyn jxsb ifzy xvto',   // The 16-character App Password you just generated
   },
 });
 

@@ -67,6 +67,9 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Logistics Net Backend!');
 });
 
+// --- Add this route to prevent the favicon.ico 404 error ---
+app.get('/favicon.ico', (req, res) => res.status(204).send());
+
 // --- OTP Generation and Sending Route ---
 app.post('/api/send-otp', async (req, res) => {
   try {

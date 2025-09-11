@@ -1,5 +1,5 @@
 // 1. Configure Environment Variables
-// This line should be at the very top. It loads the variables from your .env file.
+// This line should be at the very top. It loads the variables for local development.
 require('dotenv').config();
 
 // 2. Import Dependencies
@@ -15,20 +15,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- MongoDB Connection ---
-const MONGO_URI = 'mongodb://localhost:27017/logistics_net';
+// This will now use the variable from Render's environment.
+const MONGO_URI = process.env.MONGO_URI;
 
-// --- Email Transporter Configuration ---
-// UPDATED: I have replaced the .env variables with the credentials you provided.
-// This will fix the '535 Authentication failed' error.
 // --- Email Transporter Configuration for Gmail ---
+// This is now securely configured to use environment variables for your Gmail credentials.
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Use the built-in Gmail service
+  service: 'gmail',
   host: 'smtp.gmail.com',
   port: 465,
-  secure: true, // Use SSL
+  secure: true,
   auth: {
-    user: 'pavitradurgeshp@gmail.com', // Your full Gmail address
-    pass: 'ioyn jxsb ifzy xvto',   // The 16-character App Password you just generated
+    user: process.env.GMAIL_USER, // Reads your Gmail address from Render's environment
+    pass: process.env.GMAIL_APP_PASS,   // Reads your 16-digit App Password from Render's environment
   },
 });
 
@@ -81,18 +80,15 @@ app.post('/api/send-otp', async (req, res) => {
     await Otp.findOneAndUpdate({ email }, { otp }, { upsert: true, new: true, setDefaultsOnInsert: true });
 
     const mailOptions = {
-      from: '"Logistics Net" <no-reply@logistics.net>',
+      from: `"Logistics Net" <${process.env.GMAIL_USER}>`,
       to: email,
       subject: 'Your Verification Code',
       text: `Your OTP for Logistics Net is: ${otp}. It will expire in 5 minutes.`,
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('OTP Email sent: ' + info.response);
+    await transporter.sendMail(mailOptions);
+    console.log('OTP Email sent to: ' + email);
     
-    // This URL lets you preview the email Ethereal "caught" for you.
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-
     res.status(200).json({ message: 'OTP sent successfully to your email.' });
 
   } catch (error) {
@@ -131,5 +127,5 @@ app.post('/api/verify-otp', async (req, res) => {
 
 // 9. Start the Server
 app.listen(PORT, () => {
-  console.log(`Server is running successfully on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

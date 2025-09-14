@@ -59,6 +59,9 @@
         .recommendation-card.value { border-color: var(--primary-blue); }
         .rec-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .rec-header h4 { font-size: 1.2rem; }
+        .rec-header-actions { display: flex; align-items: center; gap: 1rem; }
+        .get-info-btn { padding: 6px 12px; font-size: 0.8rem; background-color: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); }
+        .get-info-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
         .rec-header .tag { font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; color: #000; }
         .tag.top-choice { background-color: var(--green); color: #fff; }
         .tag.value { background-color: var(--primary-blue); color: #fff; }
@@ -302,14 +305,13 @@
         // --- AI API Call Logic ---
         const plannerForm = document.getElementById('planner-form');
         const prioritySelector = document.getElementById('priority-selector');
-        // CRITICAL: Replace with your live Render URL
         const BACKEND_URL = 'https://logistics-net-backend.onrender.com';
 
         plannerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const generateBtn = e.target.querySelector('button[type="submit"]');
             const waypoints = Array.from(document.querySelectorAll('.waypoint-select')).map(s => s.value);
-            const destination = waypoints[waypoints.length - 1]; // The last waypoint is the final destination
+            const destination = waypoints[waypoints.length - 1]; 
             const fragility = document.getElementById('fragility').value;
             const selectedPriorities = Array.from(prioritySelector.querySelectorAll('.choice-card.active')).map(c => c.dataset.priority);
             
@@ -322,15 +324,16 @@
             generateBtn.disabled = true; generateBtn.textContent = 'Generating...';
 
             try {
-                // For this more complex multi-stop logic, we'll focus on the final leg for the primary recommendation
                 const response = await fetch(`${BACKEND_URL}/api/recommend`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ origin: 'Bhopal', destination: destination, priorities: selectedPriorities, fragility: fragility })
+                    body: JSON.stringify({ origin: 'Bhopal', destination, priorities: selectedPriorities, fragility })
                 });
+
                 if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error || 'Failed to get a recommendation.'); }
                 const recs = await response.json();
                 displayRecommendations(recs);
+
             } catch (error) {
                 console.error("API Call failed:", error);
                 wrapper.innerHTML = `<div class="results-placeholder" style="color: var(--red);"><h3>Error</h3><p>${error.message}</p></div>`;
@@ -355,8 +358,21 @@
                 if (!company || !company.name) return '';
                 const typeMap = { top_choice: 'Top Choice', value_pick: 'Value Pick' };
                 const classMap = { top_choice: 'top-choice', value_pick: 'value' };
-                return `<div class="recommendation-card ${classMap[type]}"><div class="rec-header"><h4>${company.name}</h4><span class="tag ${classMap[type]}">${typeMap[type]}</span></div><div class="rec-details"><img src="https://logo.clearbit.com/${company.domain}" onerror="this.style.display='none'"><div class="rec-info"><p><strong>Hub:</strong> ${company.hub}</p><p><strong>Bhopal Center:</strong> ${company.bhopal_address}</p></div><div class="rec-contact"><p>Customer Care:</p><p><strong>${company.care_number}</strong></p></div></div></div>`;
+                return `<div class="recommendation-card ${classMap[type]}">
+                    <div class="rec-header"><h4>${company.name}</h4>
+                        <div class="rec-header-actions">
+                             <button class="btn get-info-btn">Get Complete Information</button>
+                             <span class="tag ${classMap[type]}">${typeMap[type]}</span>
+                        </div>
+                    </div>
+                    <div class="rec-details">
+                        <img src="https://logo.clearbit.com/${company.domain}" onerror="this.style.display='none'">
+                        <div class="rec-info"><p><strong>Hub:</strong> ${company.hub}</p><p><strong>Bhopal Center:</strong> ${company.bhopal_address}</p></div>
+                        <div class="rec-contact"><p>Customer Care:</p><p><strong>${company.care_number}</strong></p></div>
+                    </div>
+                </div>`;
             };
+
             wrapper.innerHTML += createCard(recs.top_choice, 'top_choice');
             wrapper.innerHTML += createCard(recs.value_pick, 'value_pick');
             wrapper.style.display = 'block';
@@ -367,7 +383,10 @@
             navLinks.forEach(l => l.classList.remove('active'));
             document.querySelector('a[data-page="planner"]').classList.add('active');
             pages.forEach(page => page.classList.toggle('active', page.id === 'planner-page'));
-            document.getElementById('destination').value = 'Delhi';
+            
+            const waypoints = waypointsContainer.querySelectorAll('.waypoint-select');
+            if (waypoints.length > 0) { waypoints[waypoints.length - 1].value = 'Delhi'; }
+            
             const safetyCard = prioritySelector.querySelector('[data-priority="safety"]');
             if (safetyCard) {
                 prioritySelector.querySelectorAll('.choice-card').forEach(c => c.classList.remove('active'));
@@ -377,3 +396,4 @@
     </script>
 </body>
 </html>
+

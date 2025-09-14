@@ -5,7 +5,8 @@ import joblib
 import random
 
 # --- 1. Massively Expanded and Detailed Company Database ---
-# Now contains 50 companies with rich, actionable details for the backend to use.
+# Now contains 50 companies, EACH with complete, pseudo-realistic details.
+# This is the single source of truth to prevent "undefined" errors.
 COMPANY_DETAILS = {
     # Top Tier & Real Companies
     'Blue Dart': {'domain': 'bluedart.com', 'hub': 'Nagpur', 'bhopal_address': 'Zone II, MP Nagar', 'care_number': '1860-233-1234'},
@@ -22,7 +23,9 @@ COMPANY_DETAILS = {
     'Ekart Logistics': {'domain': 'ekartlogistics.com', 'hub': 'Indore', 'bhopal_address': 'Piplani, BHEL', 'care_number': '1800-420-1111'},
     'Shadowfax': {'domain': 'shadowfax.in', 'hub': 'Indore', 'bhopal_address': 'Kolar Road', 'care_number': '1800-123-3232'},
     'Ecom Express': {'domain': 'ecomexpress.in', 'hub': 'Delhi', 'bhopal_address': 'Habib Ganj', 'care_number': '1800-102-6666'},
-    
+    'Rivigo': {'domain': 'rivigo.com', 'hub': 'Delhi', 'bhopal_address': 'ISBT Commercial Complex', 'care_number': '1800-121-8966'},
+    'BlackBuck': {'domain': 'blackbuck.com', 'hub': 'Nagpur', 'bhopal_address': 'Transport Nagar', 'care_number': '1800-200-2456'},
+
     # Our Imaginary Startup
     'LogisticStartup': {'domain': 'example.com', 'hub': 'Pune', 'bhopal_address': '123 Innovation Road, Bhopal', 'care_number': '98765-43210'},
 
@@ -59,11 +62,23 @@ COMPANY_DETAILS = {
 }
 COMPANIES = list(COMPANY_DETAILS.keys())
 
-# --- NEW: Location-Specific Review Data ---
+# --- Massively Expanded Location-Specific Review Data ---
 LOCATION_REVIEWS = {
-    ('Bhopal', 'Indore', 'DTDC'): 4.8, ('Bhopal', 'Indore', 'Delhivery'): 4.6, ('Bhopal', 'Delhi', 'Blue Dart'): 4.9,
-    ('Bhopal', 'Delhi', 'FedEx'): 4.8, ('Bhopal', 'Pune', 'LogisticStartup'): 5.0, ('Bhopal', 'Pune', 'Mahindra Logistics'): 4.7,
-    ('Bhopal', 'Ahmedabad', 'VRL Logistics'): 4.8, ('Bhopal', 'Kolkata', 'TCI Express'): 4.7, ('Bhopal', 'Kolkata', 'Blue Dart'): 4.5,
+    # Indore Route (Known for speed and cost-effectiveness)
+    ('Bhopal', 'Indore', 'DTDC'): 4.8, ('Bhopal', 'Indore', 'Delhivery'): 4.6, ('Bhopal', 'Indore', 'XpressBees'): 4.5,
+    ('Bhopal', 'Indore', 'Blue Dart'): 4.2, # Good, but overkill for this route
+    # Delhi Route (Premium services excel here)
+    ('Bhopal', 'Delhi', 'Blue Dart'): 4.9, ('Bhopal', 'Delhi', 'FedEx'): 4.8, ('Bhopal', 'Delhi', 'DHL'): 4.7,
+    ('Bhopal', 'Delhi', 'DTDC'): 3.9, # Not their strongest route
+    # Pune Route (Startup and specialists are best)
+    ('Bhopal', 'Pune', 'LogisticStartup'): 5.0, ('Bhopal', 'Pune', 'Mahindra Logistics'): 4.7,
+    ('Bhopal', 'Pune', 'QuickMove'): 4.5, ('Bhopal', 'Pune', 'Delhivery'): 4.0, # Average service here
+    # Ahmedabad Route (Regional players are strong)
+    ('Bhopal', 'Ahmedabad', 'VRL Logistics'): 4.8, ('Bhopal', 'Ahmedabad', 'Gati'): 4.6,
+    ('Bhopal', 'Ahmedabad', 'ValueShip'): 4.5,
+    # Kolkata Route (Requires robust network)
+    ('Bhopal', 'Kolkata', 'TCI Express'): 4.7, ('Bhopal', 'Kolkata', 'Safexpress'): 4.6,
+    ('Bhopal', 'Kolkata', 'Blue Dart'): 4.5, ('Bhopal', 'Kolkata', 'Gati'): 4.1,
 }
 
 ROUTES = [("Bhopal", "Indore"), ("Bhopal", "Delhi"), ("Bhopal", "Pune"), ("Bhopal", "Ahmedabad"), ("Bhopal", "Kolkata")]
@@ -73,8 +88,14 @@ ROUTE_METRICS = {
     ("Bhopal", "Kolkata"): {"base_price": 1500, "base_time": 28},
 }
 warehouse_data = [
-    {'location': 'Indore', 'company': 'Safexpress', 'warehouse_size_sqft': 150000}, {'location': 'Delhi', 'company': 'Delhivery', 'warehouse_size_sqft': 200000},
-    {'location': 'Pune', 'company': 'LogisticStartup', 'warehouse_size_sqft': 250000}, {'location': 'Ahmedabad', 'company': 'Gati', 'warehouse_size_sqft': 90000},
+    {'location': 'Indore', 'company': 'Safexpress', 'warehouse_size_sqft': 150000},
+    {'location': 'Indore', 'company': 'Bharat Connect', 'warehouse_size_sqft': 60000},
+    {'location': 'Delhi', 'company': 'Delhivery', 'warehouse_size_sqft': 200000},
+    {'location': 'Delhi', 'company': 'Ecom Express', 'warehouse_size_sqft': 170000},
+    {'location': 'Pune', 'company': 'LogisticStartup', 'warehouse_size_sqft': 250000},
+    {'location': 'Pune', 'company': 'Mahindra Logistics', 'warehouse_size_sqft': 180000},
+    {'location': 'Ahmedabad', 'company': 'Gati', 'warehouse_size_sqft': 90000},
+    {'location': 'Ahmedabad', 'company': 'VRL Logistics', 'warehouse_size_sqft': 110000},
     {'location': 'Kolkata', 'company': 'TCI Express', 'warehouse_size_sqft': 100000},
 ]
 warehouse_df = pd.DataFrame(warehouse_data)
@@ -83,8 +104,8 @@ warehouse_df = pd.DataFrame(warehouse_data)
 logistics_data = []
 for origin, destination in ROUTES:
     metrics = ROUTE_METRICS[(origin, destination)]
-    # Use a larger, consistent random sample for each route
-    for company in random.sample(COMPANIES, 20):
+    # Use a larger, consistent random sample of 30 companies for each route
+    for company in random.sample(COMPANIES, 30): 
         price_multiplier = 1 + (hash(company) % 100) / 200.0 - 0.25
         time_multiplier = 1 + (hash(company) % 50) / 100.0 - 0.15
         safety_base = 3.5 + (hash(company) % 15) / 10.0
@@ -119,7 +140,8 @@ for (origin, destination), group in df.groupby(['origin', 'destination']):
         for fragility in ['Low', 'Medium', 'High']:
             current_weights = weights[priority].copy()
             if fragility == 'High':
-                current_weights['safety'] = min(1.0, current_weights.get('safety', 0) + 0.3)
+                current_weights['safety'] = min(1.0, current_weights.get('safety', 0) + 0.4) # Increased weight for high fragility
+                current_weights['review'] = min(1.0, current_weights.get('review', 0) + 0.2)
             group['combined_score'] = (
                 group['price_score'] * current_weights.get('price', 0) +
                 group['speed_score'] * current_weights.get('speed', 0) +
@@ -138,7 +160,6 @@ le_destination = LabelEncoder().fit(train_df['destination'])
 le_priority = LabelEncoder().fit(train_df['priority'])
 le_fragility = LabelEncoder().fit(train_df['fragility'])
 le_company = LabelEncoder().fit(train_df['top_choice_company'])
-
 train_df['origin_encoded'] = le_origin.transform(train_df['origin'])
 train_df['destination_encoded'] = le_destination.transform(train_df['destination'])
 train_df['priority_encoded'] = le_priority.transform(train_df['priority'])
@@ -160,21 +181,22 @@ joblib.dump(le_destination, 'le_destination.pkl')
 joblib.dump(le_priority, 'le_priority.pkl')
 joblib.dump(le_fragility, 'le_fragility.pkl')
 joblib.dump(le_company, 'le_company.pkl')
-
-print("Advanced model with 50 companies and location-based reviews trained and saved successfully!")
+print("Definitive model with 50 companies and advanced logic trained and saved successfully!")
 
 # --- 8. Example Prediction ---
-print("\n--- Example Prediction ---")
-# Scenario: A user wants to ship a highly fragile item to Pune and cares most about safety.
-test_input_data = [['Bhopal', 'Pune', 'safety', 'High']]
-test_df = pd.DataFrame(test_input_data, columns=['origin', 'destination', 'priority', 'fragility'])
+print("\n--- Example Predictions ---")
+def predict_best_company(origin, destination, priority, fragility):
+    test_input_data = [[origin, destination, priority, fragility]]
+    test_df = pd.DataFrame(test_input_data, columns=['origin', 'destination', 'priority', 'fragility'])
+    test_df['origin_encoded'] = le_origin.transform(test_df['origin'])
+    test_df['destination_encoded'] = le_destination.transform(test_df['destination'])
+    test_df['priority_encoded'] = le_priority.transform(test_df['priority'])
+    test_df['fragility_encoded'] = le_fragility.transform(test_df['fragility'])
+    prediction_encoded = model.predict(test_df[features])
+    prediction = le_company.inverse_transform(prediction_encoded)
+    print(f"Query: Origin='{origin}', Destination='{destination}', Priority='{priority}', Fragility='{fragility}'")
+    print(f"==> Model Recommends: {prediction[0]}")
 
-test_df['origin_encoded'] = le_origin.transform(test_df['origin'])
-test_df['destination_encoded'] = le_destination.transform(test_df['destination'])
-test_df['priority_encoded'] = le_priority.transform(test_df['priority'])
-test_df['fragility_encoded'] = le_fragility.transform(test_df['fragility'])
-prediction_encoded = model.predict(test_df[features])
-prediction = le_company.inverse_transform(prediction_encoded)
-
-print(f"Query: Origin='Bhopal', Destination='Pune', Priority='safety', Fragility='High'")
-print(f"==> Model Recommends: {prediction[0]}")
+predict_best_company('Bhopal', 'Pune', 'safety', 'High')
+predict_best_company('Bhopal', 'Indore', 'cost', 'Low')
+predict_best_company('Bhopal', 'Delhi', 'safety', 'High') # Should favor Blue Dart or FedEx due to reviews

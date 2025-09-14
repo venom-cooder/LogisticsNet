@@ -175,8 +175,8 @@
                  <table class="data-table">
                     <thead><tr><th>Issue ID</th><th>Shipment ID</th><th>Partner</th><th>Complaint</th><th>Status</th></tr></thead>
                     <tbody>
-                        <tr><td>#C-001</td><td>#B-119</td><td>Current Partner A</td><td>Package Damaged</td><td><span class="status-tag status-open">Open</span></td></tr>
-                        <tr><td>#C-002</td><td>#B-115</td><td>Current Partner B</td><td>Shipment Delayed</td><td><span class="status-tag status-resolved">Resolved</span></td></tr>
+                        <tr><td>#C-001</td><td>#B-119</td><td>DTDC</td><td>Package Damaged</td><td><span class="status-tag status-open">Open</span></td></tr>
+                        <tr><td>#C-002</td><td>#B-115</td><td>Gati</td><td>Shipment Delayed</td><td><span class="status-tag status-resolved">Resolved</span></td></tr>
                     </tbody>
                  </table>
              </div>
@@ -356,7 +356,6 @@
                 if (!company || !company.name) return '';
                 const typeMap = { top_choice: 'Top Choice', value_pick: 'Value Pick' };
                 const classMap = { top_choice: 'top-choice', value_pick: 'value' };
-
                 const infoUrl = `company_details.html?company=${encodeURIComponent(company.name)}&priorities=${priorities.join(',')}`;
 
                 return `<div class="recommendation-card ${classMap[type]}">
@@ -379,14 +378,18 @@
             wrapper.style.display = 'block';
         }
 
+        // "Find a Better Partner" button logic
         document.getElementById('find-partner-btn').addEventListener('click', () => {
             navLinks.forEach(l => l.classList.remove('active'));
             document.querySelector('a[data-page="planner"]').classList.add('active');
             pages.forEach(page => page.classList.toggle('active', page.id === 'planner-page'));
             
             const waypointSelects = waypointsContainer.querySelectorAll('.waypoint-select');
-            if(waypointSelects.length > 0) {
-                waypointSelects[waypointSelects.length-1].value = 'Delhi';
+            if (waypointSelects.length > 0) {
+                const lastSelect = waypointSelects[waypointSelects.length-1];
+                if(Array.from(lastSelect.options).some(o => o.value === 'Delhi')) {
+                    lastSelect.value = 'Delhi';
+                }
             }
             
             const safetyCard = prioritySelector.querySelector('[data-priority="safety"]');
@@ -398,3 +401,4 @@
     </script>
 </body>
 </html>
+

@@ -450,7 +450,7 @@
         const header = document.querySelector('.site-header');
 
         // --- Basic Three.js Scene Setup ---
-        let scene, camera, renderer, globe, clouds, truck, truckPivot, particleSystem;
+        let scene, camera, renderer, globe, clouds, truckPivot, stars;
         
         function init() {
             scene = new THREE.Scene();
@@ -461,57 +461,59 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-            // --- Create the 3D Globe ---
+            // --- Lighting ---
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            directionalLight.position.set(5, 3, 5);
+            scene.add(directionalLight);
+
+            // --- Create the 3D Globe with realistic material ---
             const globeRadius = 15;
             const textureLoader = new THREE.TextureLoader();
-            const earthTexture = textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthmap1k.jpg');
+            const globeMaterial = new THREE.MeshPhongMaterial({
+                map: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthmap1k.jpg'),
+                bumpMap: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthbump1k.jpg'),
+                bumpScale: 0.05,
+                specularMap: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthspec1k.jpg'),
+                specular: new THREE.Color('grey'),
+            });
             const globeGeometry = new THREE.SphereGeometry(globeRadius, 64, 64);
-            const globeMaterial = new THREE.MeshBasicMaterial({ map: earthTexture });
             globe = new THREE.Mesh(globeGeometry, globeMaterial);
             scene.add(globe);
 
             // --- Create Clouds Layer ---
-            const cloudGeometry = new THREE.SphereGeometry(globeRadius + 0.2, 64, 64);
-            const cloudTexture = textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthcloudmap.png');
-            const cloudMaterial = new THREE.MeshBasicMaterial({
-                map: cloudTexture,
+            const cloudGeometry = new THREE.SphereGeometry(globeRadius + 0.1, 64, 64);
+            const cloudMaterial = new THREE.MeshPhongMaterial({
+                map: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthcloudmap.png'),
                 transparent: true,
-                opacity: 0.3
+                opacity: 0.4
             });
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
             scene.add(clouds);
+            
+            // --- Starfield Background ---
+            const starGeometry = new THREE.BufferGeometry();
+            const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
+            const starVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = -Math.random() * 2000;
+                starVertices.push(x, y, z);
+            }
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
 
             // --- Create the orbiting truck ---
             truckPivot = new THREE.Group();
             scene.add(truckPivot);
-            truck = createTruck(); // Function to create a detailed truck
+            const truck = createTruck();
             truck.position.z = globeRadius + 1.5;
             truck.scale.set(0.15, 0.15, 0.15);
             truck.rotation.y = -Math.PI / 2;
             truckPivot.add(truck);
-            
-            // --- Create the Blue Sprinklers (Particle System) ---
-            const particleCount = 2000;
-            const particles = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            for (let i = 0; i < particleCount * 3; i++) {
-                // Place particles in a large sphere around the globe
-                const theta = Math.random() * 2 * Math.PI;
-                const phi = Math.acos((Math.random() * 2) - 1);
-                const radius = globeRadius + 10 + Math.random() * 40;
-                positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
-                positions[i*3+1] = radius * Math.sin(phi) * Math.sin(theta);
-                positions[i*3+2] = radius * Math.cos(phi);
-            }
-            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            const particleMaterial = new THREE.PointsMaterial({
-                color: 0x00aaff,
-                size: 0.2,
-                transparent: true,
-                opacity: 0.6
-            });
-            particleSystem = new THREE.Points(particles, particleMaterial);
-            scene.add(particleSystem);
             
             // --- Event Listeners ---
             window.addEventListener('resize', onWindowResize, false);
@@ -531,29 +533,24 @@
 
         function createTruck() {
             const truckGroup = new THREE.Group();
-            const truckBodyMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            const wheelMaterial = new THREE.MeshBasicMaterial({ color: 0x333333 });
-
+            const truckBodyMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.5, roughness: 0.5 });
+            const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
             const cab = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1, 1), truckBodyMaterial);
             cab.position.set(0.75, 0, 0);
             const trailer = new THREE.Mesh(new THREE.BoxGeometry(3, 1.2, 1), truckBodyMaterial);
             trailer.position.set(-1.5, 0.1, 0);
-
             const wheelGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
             wheelGeometry.rotateX(Math.PI / 2);
-
             const wheelPositions = [[1, 0.5], [1, -0.5], [-1, 0.5], [-1, -0.5], [-2, 0.5], [-2, -0.5]];
             wheelPositions.forEach(pos => {
                 const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
                 wheel.position.set(pos[0], -0.5, pos[1]);
                 truckGroup.add(wheel);
             });
-
             truckGroup.add(cab, trailer);
             return truckGroup;
         }
 
-        // --- Mouse Interaction ---
         let mouseX = 0;
         let mouseY = 0;
         function onMouseMove(event) {
@@ -561,7 +558,6 @@
             mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
         }
 
-        // --- Handle Scrolling for Header ---
         function onScroll() {
             if (window.scrollY > 100) {
                 header.classList.add('visible');
@@ -570,31 +566,22 @@
             }
         }
 
-        // --- Handle Window Resizing ---
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // --- Animation Loop ---
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
-            const elapsedTime = clock.getElapsedTime();
 
-            // Animate the globe and clouds
             globe.rotation.y += 0.0008;
             clouds.rotation.y += 0.001;
 
-            // Animate the truck's orbit
             truckPivot.rotation.y += 0.005;
             truckPivot.rotation.x += 0.002;
-            
-            // Animate the particle system
-            particleSystem.rotation.y = -elapsedTime * 0.05;
 
-            // Make camera react to mouse movement for a parallax effect
             camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
             camera.position.y += (mouseY * 5 - camera.position.y) * 0.05;
             camera.lookAt(scene.position);

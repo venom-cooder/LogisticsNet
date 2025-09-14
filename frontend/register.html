@@ -659,7 +659,9 @@
                         navigateStep(e.target, 1);
 
                     } catch (error) {
-                        showMessage(messageEl, error.message || 'An error occurred.', 'error');
+                        // THIS PART IS NEW: More detailed logging
+                        console.error('Fetch Error:', error);
+                        showMessage(messageEl, 'Could not connect to the server. Please check the console for details.', 'error');
                     } finally {
                         button.disabled = false;
                         button.textContent = 'Send OTP';
@@ -692,7 +694,9 @@
                         window.location.href = dashboardPage;
 
                     } catch (error) {
-                        showMessage(messageEl, error.message || 'An error occurred.', 'error');
+                        // THIS PART IS NEW: More detailed logging
+                        console.error('Fetch Error:', error);
+                        showMessage(messageEl, 'Could not connect to the server. Please check the console for details.', 'error');
                         button.disabled = false;
                         button.textContent = button.textContent.replace('Verifying...', 'Verify');
                     }

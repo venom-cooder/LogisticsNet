@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Details - Logistics Net</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #00000a; --nav-bg: rgba(10, 10, 20, 0.5); --card-bg: rgba(20, 20, 35, 0.6);
+            --border-color: rgba(255, 255, 255, 0.1); --primary-blue: #00aaff; --text-primary: #ffffff;
+            --text-secondary: #a9a9b3; --green: #4caf50; --yellow: #fbc02d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-primary); overflow-x: hidden; }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .top-nav { position: fixed; top: 0; left: 0; width: 100%; background: var(--nav-bg); border-bottom: 1px solid var(--border-color); backdrop-filter: blur(15px); z-index: 100; padding: 0 2rem; display: flex; align-items: center; height: 70px; }
+        .main-container { padding: 100px 3rem 2rem; max-width: 1200px; margin: 0 auto; }
+        .nav-logo { font-size: 1.8rem; font-weight: 700; color: var(--text-primary); text-decoration: none; }
+        .nav-logo span { color: var(--primary-blue); }
+        .nav-actions { margin-left: auto; }
+        .back-btn { background-color: rgba(255, 255, 255, 0.1); color: var(--text-primary); padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: background-color 0.3s ease; }
+        .back-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
+        .main-panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+        .panel-title { font-size: 1.5rem; margin-bottom: 1.5rem; }
+        .btn { display: inline-block; padding: 12px 28px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; color: var(--text-primary); cursor: pointer; text-decoration: none; transition: background-color 0.3s ease; background-color: var(--primary-blue); }
+        .btn:hover { background-color: #0088cc; }
+        .company-header { display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; }
+        .company-header img { height: 80px; width: 150px; object-fit: contain; background: #fff; border-radius: 10px; padding: 10px; }
+        .company-header h1 { font-size: 3rem; }
+        .ai-justification { border-left: 4px solid var(--primary-blue); padding-left: 1.5rem; }
+        .ai-justification p { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.7; }
+        .ai-justification strong { color: var(--text-primary); }
+        .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .detail-card { background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px; }
+        .detail-card label { display: block; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .detail-card p { font-size: 1.2rem; font-weight: 600; }
+        .rating-bar { width: 100%; height: 8px; background-color: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 0.5rem; }
+        .rating-fill { height: 100%; border-radius: 4px; }
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .input-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <header class="top-nav">
+        <a href="index.html" class="nav-logo">Logistics<span>Net</span></a>
+        <div class="nav-actions"><a href="business_dashboard.html" class="back-btn">← Back to Dashboard</a></div>
+    </header>
+
+    <main class="main-container">
+        <div id="loading-state">
+             <h1 style="text-align: center; color: var(--text-secondary);">Loading Company Details...</h1>
+        </div>
+        <div id="content-state" style="display: none;">
+            <div class="main-panel">
+                <div class="company-header">
+                    <img id="company-logo" src="" alt="Company Logo">
+                    <h1 id="company-name"></h1>
+                </div>
+                <div class="ai-justification">
+                    <h2 class="panel-title">Why LogAi Recommended This Partner</h2>
+                    <p id="recommendation-reason"></p>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-card"><label>Overall Safety Rating</label><p id="detail-safety"></p><div class="rating-bar"><div id="safety-bar" class="rating-fill"></div></div></div>
+                <div class="detail-card"><label>Average Speed Score</label><p id="detail-speed"></p><div class="rating-bar"><div id="speed-bar" class="rating-fill"></div></div></div>
+                <div class="detail-card"><label>Cost Effectiveness</label><p id="detail-cost"></p><div class="rating-bar"><div id="cost-bar" class="rating-fill"></div></div></div>
+                <div class="detail-card"><label>Customer Review Score</label><p id="detail-review"></p><div class="rating-bar"><div id="review-bar" class="rating-fill"></div></div></div>
+            </div>
+
+             <div class="main-panel" style="margin-top: 1.5rem;">
+                <h2 class="panel-title">Location Information</h2>
+                <div class="details-grid">
+                    <div class="detail-card"><label>Nearest Main Hub</label><p id="detail-hub"></p></div>
+                    <div class="detail-card" style="grid-column: span 2;"><label>Bhopal Center Address</label><p id="detail-address"></p></div>
+                    <div class="detail-card"><label>Customer Care Number</label><p id="detail-care"></p></div>
+                </div>
+            </div>
+
+            <div class="main-panel" style="margin-top: 1.5rem;">
+                <h2 class="panel-title">Start Your Business with <span id="form-company-name"></span></h2>
+                <form id="contact-form">
+                    <div class="details-grid">
+                        <div class="input-group"><label for="user-name">Your Name</label><input type="text" id="user-name" required></div>
+                        <div class="input-group"><label for="user-company">Your Company</label><input type="text" id="user-company" required></div>
+                        <div class="input-group"><label for="user-contact">Contact Number</label><input type="tel" id="user-contact" required></div>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;">Request a Call Back</button>
+                    <p id="form-success-message" style="color: var(--green); text-align: center; margin-top: 1rem; display: none;">Your request has been sent! Their team will contact you shortly.</p>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="module">
+        // --- 3D Background Setup ---
+        const canvas = document.getElementById('bg-canvas');
+        let scene, camera, renderer, particleSystem;
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 50;
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            const particleCount = 2000;
+            const particles = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i++) {
+                const theta = Math.random() * 2 * Math.PI;
+                const phi = Math.acos((Math.random() * 2) - 1);
+                const radius = 20 + Math.random() * 80;
+                positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i*3+1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i*3+2] = radius * Math.cos(phi);
+            }
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMaterial = new THREE.PointsMaterial({ color: 0x00aaff, size: 0.2, transparent: true, opacity: 0.4 });
+            particleSystem = new THREE.Points(particles, particleMaterial);
+            scene.add(particleSystem);
+            window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+            animate3D();
+        }
+        const clock = new THREE.Clock();
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            const elapsedTime = clock.getElapsedTime();
+            if (particleSystem) particleSystem.rotation.y = -elapsedTime * 0.03;
+            renderer.render(scene, camera);
+        }
+        init3D();
+
+        // --- Dynamic Content Loading from API ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const BACKEND_URL = 'https://logistics-net-backend.onrender.com';
+            const urlParams = new URLSearchParams(window.location.search);
+            const companyName = urlParams.get('company');
+            const priorities = urlParams.get('priorities')?.split(',') || [];
+
+            const loadingState = document.getElementById('loading-state');
+            const contentState = document.getElementById('content-state');
+
+            if (!companyName) {
+                loadingState.innerHTML = '<h1>Error: Company name not provided in URL.</h1>';
+                return;
+            }
+
+            try {
+                // Fetch the company details from your new backend endpoint
+                const response = await fetch(`${BACKEND_URL}/api/company/${encodeURIComponent(companyName)}`);
+                if (!response.ok) {
+                    throw new Error('Company details could not be found.');
+                }
+                const details = await response.json();
+
+                // Populate the page with the fetched data
+                document.getElementById('company-logo').src = `https://logo.clearbit.com/${details.domain}`;
+                document.getElementById('company-name').textContent = companyName;
+                document.getElementById('form-company-name').textContent = companyName;
+
+                // Generate AI Justification
+                let reason = `You selected <strong>${priorities.join(' & ')}</strong> as your top priorities. LogAi recommended <strong>${companyName}</strong> because:`;
+                let reasons = [];
+                if (priorities.includes('safety')) reasons.push(`it has an outstanding safety rating of <strong>${details.safety}/5.0</strong>`);
+                if (priorities.includes('cost')) reasons.push(`it offers highly competitive pricing (Score: <strong>${details.cost}/10</strong>)`);
+                if (priorities.includes('speed')) reasons.push(`it provides excellent delivery times (Score: <strong>${details.speed}/10</strong>)`);
+                if (priorities.includes('warehouse')) reasons.push(`it has superior warehouse facilities`);
+                reason += ' ' + reasons.join(', and ') + '.';
+                document.getElementById('recommendation-reason').innerHTML = reason;
+
+                // Populate rating cards (10-point scale converted to percentage)
+                const populateBar = (elementId, value, max, isInverse = false) => {
+                    const bar = document.getElementById(elementId);
+                    const percent = isInverse ? (1 - (value / max)) * 100 : (value / max) * 100;
+                    bar.style.width = `${percent}%`;
+                    bar.style.backgroundColor = `var(--${percent > 80 ? 'green' : percent > 50 ? 'yellow' : 'red'})`;
+                };
+
+                document.getElementById('detail-safety').textContent = `${details.safety} / 5.0`;
+                populateBar('safety-bar', details.safety, 5);
+                document.getElementById('detail-speed').textContent = `${details.speed} / 10`;
+                populateBar('speed-bar', details.speed, 10);
+                document.getElementById('detail-cost').textContent = `${details.cost} / 10`;
+                populateBar('cost-bar', details.cost, 10, true);
+                document.getElementById('detail-review').textContent = `${details.reviews} / 5.0`;
+                populateBar('review-bar', details.reviews, 5);
+                
+                // Populate location info
+                document.getElementById('detail-hub').textContent = details.hub;
+                document.getElementById('detail-address').textContent = details.bhopal_address;
+                document.getElementById('detail-care').textContent = details.care_number;
+                
+                // Show content
+                loadingState.style.display = 'none';
+                contentState.style.display = 'block';
+
+            } catch (error) {
+                loadingState.innerHTML = `<h1>Error: ${error.message}</h1><p>Please go back and try again.</p>`;
+            }
+
+            document.getElementById('contact-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                document.getElementById('form-success-message').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

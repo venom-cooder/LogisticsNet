@@ -365,8 +365,8 @@
                     </div>
                     <div class="form-step" data-step="3">
                         <div class="input-group"><label for="startup-email-signup">Email</label><input type="email" class="email-input" id="startup-email-signup" required></div>
-                        <div class="input-group"><label for="startup-password-signup">Create Password</label><input type="password" id="startup-password-signup" required></div>
-                         <div class="input-group"><label for="startup-password-confirm">Confirm Password</label><input type="password" id="startup-password-confirm" required></div>
+                        <div class="input-group"><label for="startup-password-signup">Create Password</label><input type="password" class="password-input" id="startup-password-signup" required></div>
+                         <div class="input-group"><label for="startup-password-confirm">Confirm Password</label><input type="password" class="confirm-password-input" id="startup-password-confirm" required></div>
                         <div class="button-group"><button type="button" class="btn btn-secondary js-prev-step">Back</button><button type="button" class="btn js-send-otp">Send OTP</button></div>
                     </div>
                      <div class="form-step" data-step="4">
@@ -378,9 +378,10 @@
              <!-- Startup Login Content -->
             <div class="tab-content" data-tab-content="login">
                 <div class="panel-header"><h1>Startup Login</h1></div>
+                <div class="message"></div>
                 <form class="login-form" data-dashboard="startup_dashboard.html">
-                     <div class="input-group"><label for="startup-email-login">Email</label><input type="email" id="startup-email-login" required></div>
-                    <div class="input-group"><label for="startup-password-login">Password</label><input type="password" id="startup-password-login" required></div>
+                     <div class="input-group"><label for="startup-email-login">Email</label><input type="email" id="startup-email-login" class="email-input" required></div>
+                    <div class="input-group"><label for="startup-password-login">Password</label><input type="password" id="startup-password-login" class="password-input" required></div>
                     <button type="submit" class="btn">Log In</button>
                 </form>
             </div>
@@ -410,8 +411,8 @@
                     </div>
                      <div class="form-step" data-step="3">
                         <div class="input-group"><label for="business-email-signup">Work Email</label><input type="email" class="email-input" id="business-email-signup" required></div>
-                        <div class="input-group"><label for="business-password-signup">Create Password</label><input type="password" id="business-password-signup" required></div>
-                        <div class="input-group"><label for="business-password-confirm">Confirm Password</label><input type="password" id="business-password-confirm" required></div>
+                        <div class="input-group"><label for="business-password-signup">Create Password</label><input type="password" class="password-input" id="business-password-signup" required></div>
+                        <div class="input-group"><label for="business-password-confirm">Confirm Password</label><input type="password" class="confirm-password-input" id="business-password-confirm" required></div>
                         <div class="button-group"><button type="button" class="btn btn-secondary js-prev-step">Back</button><button type="button" class="btn js-send-otp">Send OTP</button></div>
                     </div>
                      <div class="form-step" data-step="4">
@@ -423,9 +424,10 @@
              <!-- Business Login Content -->
             <div class="tab-content" data-tab-content="login">
                  <div class="panel-header"><h1>Business Login</h1></div>
+                 <div class="message"></div>
                  <form class="login-form" data-dashboard="business_dashboard.html">
-                    <div class="input-group"><label for="business-email-login">Work Email</label><input type="email" id="business-email-login" required></div>
-                    <div class="input-group"><label for="business-password-login">Password</label><input type="password" id="business-password-login" required></div>
+                    <div class="input-group"><label for="business-email-login">Work Email</label><input type="email" id="business-email-login" class="email-input" required></div>
+                    <div class="input-group"><label for="business-password-login">Password</label><input type="password" id="business-password-login" class="password-input" required></div>
                     <button type="submit" class="btn">Log In</button>
                  </form>
             </div>
@@ -443,8 +445,8 @@
                 <div class="panel-header"><h1>Welcome Back</h1></div>
                 <div class="message"></div>
                 <form class="login-form" data-dashboard="personal_dashboard.html">
-                    <div class="input-group"><label for="login-email">Email</label><input type="email" id="login-email" required></div>
-                    <div class="input-group"><label for="login-password">Password</label><input type="password" id="login-password" required></div>
+                    <div class="input-group"><label for="login-email">Email</label><input type="email" id="login-email" class="email-input" required></div>
+                    <div class="input-group"><label for="login-password">Password</label><input type="password" id="login-password" class="password-input" required></div>
                     <button type="submit" class="btn">Log In</button>
                 </form>
             </div>
@@ -456,8 +458,8 @@
                     <div class="form-step active" data-step="1">
                         <div class="input-group"><label for="signup-name">Full Name</label><input type="text" id="signup-name" required></div>
                         <div class="input-group"><label for="signup-email">Email</label><input type="email" class="email-input" id="signup-email" required></div>
-                         <div class="input-group"><label for="signup-password">Create Password</label><input type="password" id="signup-password" required></div>
-                        <div class="input-group"><label for="signup-password-confirm">Confirm Password</label><input type="password" id="signup-password-confirm" required></div>
+                         <div class="input-group"><label for="signup-password">Create Password</label><input type="password" class="password-input" id="signup-password" required></div>
+                        <div class="input-group"><label for="signup-password-confirm">Confirm Password</label><input type="password" class="confirm-password-input" id="signup-password-confirm" required></div>
                         <button type="button" class="btn js-send-otp">Send OTP</button>
                     </div>
                     <div class="form-step" data-step="2">
@@ -477,76 +479,85 @@
     <script type="module">
         // --- 3D Background Setup ---
         const canvas = document.getElementById('bg-canvas');
-        let scene, camera, renderer, particleSystem;
-        const movingObjects = [];
-
-        function createMovingObject(type) {
-             const group = new THREE.Group();
-            const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 });
-            if (type === 'truck') {
-                const cab = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 1), material); cab.position.x = 1;
-                const trailer = new THREE.Mesh(new THREE.BoxGeometry(3, 1.2, 1), material); trailer.position.x = -1.5;
-                group.add(cab, trailer);
-            } else {
-                const body = new THREE.Mesh(new THREE.CylinderGeometry(0, 0.8, 6, 8), material); body.rotation.z = Math.PI / 2;
-                const wing = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.3, 9), material);
-                group.add(body, wing);
-            }
-            group.position.x = window.innerWidth / 10 + Math.random() * 50;
-            group.position.y = (Math.random() - 0.5) * (window.innerHeight / 5);
-            group.position.z = (Math.random() - 0.5) * 40;
-            group.speed = 0.1 + Math.random() * 0.2;
-            scene.add(group);
-            movingObjects.push(group);
-        }
+        let scene, camera, renderer, jupiter, stars, asteroidBelt;
+        const clock = new THREE.Clock();
+        const textureLoader = new THREE.TextureLoader();
         
         function init3D() {
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 50;
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.z = 35;
+
             renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            const particleCount = 2000;
-            const particles = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            for (let i = 0; i < particleCount * 3; i++) {
-                const theta = Math.random() * 2 * Math.PI;
-                const phi = Math.acos((Math.random() * 2) - 1);
-                const radius = 20 + Math.random() * 80;
-                positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
-                positions[i*3+1] = radius * Math.sin(phi) * Math.sin(theta);
-                positions[i*3+2] = radius * Math.cos(phi);
-            }
-            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            const particleMaterial = new THREE.PointsMaterial({
-                color: 0x00aaff,
-                size: 0.2,
-                transparent: true,
-                opacity: 0.4
-            });
-            particleSystem = new THREE.Points(particles, particleMaterial);
-            scene.add(particleSystem);
-            
-            for(let i=0; i < 4; i++) createMovingObject('truck');
-            for(let i=0; i < 4; i++) createMovingObject('airplane');
 
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            directionalLight.position.set(15, 10, 5);
+            scene.add(directionalLight);
+            
+            // Jupiter
+            const jupiterMaterial = new THREE.MeshPhongMaterial({
+                map: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/jupitermap.jpg'),
             });
+            jupiter = new THREE.Mesh(new THREE.SphereGeometry(15, 64, 64), jupiterMaterial);
+            jupiter.position.x = -10;
+            jupiter.rotation.z = 0.1;
+            scene.add(jupiter);
+
+            // Stars
+            const starGeometry = new THREE.BufferGeometry();
+            const starVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                starVertices.push((Math.random() - 0.5) * 2000, (Math.random() - 0.5) * 2000, -Math.random() * 1500);
+            }
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0xffffff, size: 0.15 }));
+            scene.add(stars);
+
+            // Asteroids
+            asteroidBelt = new THREE.Group();
+            const asteroidGeometry = new THREE.IcosahedronGeometry(1, 0);
+            const asteroidMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.8 });
+            for (let i = 0; i < 1500; i++) {
+                const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
+                const angle = Math.random() * Math.PI * 2; 
+                const radius = 50 + Math.random() * 100;
+                asteroid.position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 25, Math.sin(angle) * radius);
+                asteroid.scale.setScalar(Math.random() * 0.4 + 0.1);
+                asteroid.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+                asteroidBelt.add(asteroid);
+            }
+            scene.add(asteroidBelt);
+
+            window.addEventListener('resize', onWindowResize, false);
+            document.addEventListener('mousemove', onMouseMove, false);
             animate3D();
         }
-        const clock = new THREE.Clock();
+
+        let mouseX = 0;
+        let mouseY = 0;
+        function onMouseMove(event) {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
         function animate3D() {
             requestAnimationFrame(animate3D);
             const elapsedTime = clock.getElapsedTime();
-            if(particleSystem) particleSystem.rotation.y = -elapsedTime * 0.03;
-            movingObjects.forEach(obj => {
-                obj.position.x -= obj.speed;
-                if (obj.position.x < -window.innerWidth / 10) obj.position.x = window.innerWidth / 10;
-            });
+            jupiter.rotation.y += 0.0008;
+            asteroidBelt.rotation.y += 0.0004;
+            camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 5 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
             renderer.render(scene, camera);
         }
         init3D();
@@ -557,19 +568,14 @@
             const roleCards = document.querySelectorAll('.role-card');
             const formPanels = document.querySelectorAll('.form-panel');
             const backButtons = document.querySelectorAll('.js-back-to-roles');
-            
-            // --- CRITICAL: Replace with your live Render URL ---
             const BACKEND_URL = 'https://logistics-net-backend.onrender.com';
 
-            // --- Panel Switching Logic ---
             roleCards.forEach(card => {
                 card.addEventListener('click', () => {
                     const formId = card.dataset.form;
                     const formToShow = document.getElementById(formId);
                     roleSelectionPanel.classList.add('hidden');
-                    if(formToShow) {
-                       formToShow.classList.add('active');
-                    }
+                    if(formToShow) formToShow.classList.add('active');
                 });
             });
 
@@ -578,25 +584,15 @@
                     const currentForm = button.closest('.form-panel');
                     currentForm.classList.remove('active');
                     currentForm.querySelectorAll('form').forEach(form => form.reset());
-                    currentForm.querySelectorAll('.form-step').forEach((step, index) => {
-                         if (step.closest('.signup-form')) {
-                            step.classList.toggle('active', step.dataset.step === '1');
-                         }
-                    });
+                    currentForm.querySelectorAll('.form-step').forEach((step) => step.classList.toggle('active', step.dataset.step === '1'));
                     currentForm.querySelectorAll('.tab-button').forEach((btn, index) => btn.classList.toggle('active', index === 0));
                     currentForm.querySelectorAll('.tab-content').forEach((content, index) => content.classList.toggle('active', index === 0));
                     roleSelectionPanel.classList.remove('hidden');
                 });
             });
 
-            // --- Multi-step form navigation ---
-            document.querySelectorAll('.js-next-step').forEach(button => {
-                button.addEventListener('click', (e) => navigateStep(e.target, 1));
-            });
-
-            document.querySelectorAll('.js-prev-step').forEach(button => {
-                button.addEventListener('click', (e) => navigateStep(e.target, -1));
-            });
+            document.querySelectorAll('.js-next-step').forEach(button => button.addEventListener('click', (e) => navigateStep(e.target, 1)));
+            document.querySelectorAll('.js-prev-step').forEach(button => button.addEventListener('click', (e) => navigateStep(e.target, -1)));
             
             function navigateStep(button, direction) {
                 const currentStep = button.closest('.form-step');
@@ -607,7 +603,6 @@
                 }
             }
             
-            // --- Tab Switching Logic ---
             formPanels.forEach(panel => {
                 const tabButtons = panel.querySelectorAll('.tab-button');
                 const tabContents = panel.querySelectorAll('.tab-content');
@@ -617,59 +612,40 @@
                             tabButtons.forEach(btn => btn.classList.remove('active'));
                             button.classList.add('active');
                             const tabId = button.dataset.tab;
-                            tabContents.forEach(content => {
-                                content.classList.toggle('active', content.dataset.tabContent === tabId);
-                            });
+                            tabContents.forEach(content => content.classList.toggle('active', content.dataset.tabContent === tabId));
                         });
                     });
                 }
             });
 
-            // --- OTP Sending Logic ---
             document.querySelectorAll('.js-send-otp').forEach(button => {
                 button.addEventListener('click', async (e) => {
                     const form = e.target.closest('form');
                     const emailInput = form.querySelector('.email-input');
                     const messageEl = form.closest('.tab-content').querySelector('.message');
-                    
                     const passInput = form.querySelector('input[type="password"]:not([id*="confirm"])');
                     const confirmPassInput = form.querySelector('input[id*="confirm"]');
-                    if(passInput.value !== confirmPassInput.value) {
-                         showMessage(messageEl, 'Passwords do not match.', 'error');
-                         return;
-                    }
-                    if(passInput.value.length < 6) {
-                        showMessage(messageEl, 'Password must be at least 6 characters.', 'error');
-                        return;
-                    }
 
-                    button.disabled = true;
-                    button.textContent = 'Sending...';
+                    if(passInput.value !== confirmPassInput.value) { return showMessage(messageEl, 'Passwords do not match.', 'error'); }
+                    if(passInput.value.length < 6) { return showMessage(messageEl, 'Password must be at least 6 characters.', 'error'); }
+
+                    button.disabled = true; button.textContent = 'Sending...';
                     
                     try {
-                        const response = await fetch(`${BACKEND_URL}/api/send-otp`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email: emailInput.value })
-                        });
+                        const response = await fetch(`${BACKEND_URL}/api/send-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput.value }) });
+                        if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || 'Failed to send OTP'); }
                         const data = await response.json();
-                        if (!response.ok) throw new Error(data.message);
-                        
                         showMessage(messageEl, data.message, 'success');
                         navigateStep(e.target, 1);
-
                     } catch (error) {
-                        // THIS PART IS NEW: More detailed logging
                         console.error('Fetch Error:', error);
-                        showMessage(messageEl, 'Could not connect to the server. Please check the console for details.', 'error');
+                        showMessage(messageEl, 'Could not connect to the server.', 'error');
                     } finally {
-                        button.disabled = false;
-                        button.textContent = 'Send OTP';
+                        button.disabled = false; button.textContent = 'Send OTP';
                     }
                 });
             });
 
-            // --- OTP Verification & Signup Logic ---
             document.querySelectorAll('form.signup-form').forEach(form => {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -679,49 +655,98 @@
                     const messageEl = form.closest('.tab-content').querySelector('.message');
                     const dashboardPage = form.dataset.dashboard;
 
-                    button.disabled = true;
-                    button.textContent = 'Verifying...';
+                    button.disabled = true; button.textContent = 'Verifying...';
 
                     try {
-                        const response = await fetch(`${BACKEND_URL}/api/verify-otp`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                        const verifyResponse = await fetch(`${BACKEND_URL}/api/verify-otp`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ email: emailInput.value, otp: otpInput.value })
                         });
-                        const data = await response.json();
-                         if (!response.ok) throw new Error(data.message);
+                        if (!verifyResponse.ok) { const data = await verifyResponse.json(); throw new Error(data.message); }
+
+                        // OTP Verified, now register the user
+                        button.textContent = 'Registering...';
+                        
+                        let registrationEndpoint = ''; let registrationBody = {};
+                        
+                        if (dashboardPage === 'startup_dashboard.html') {
+                            registrationEndpoint = '/api/register/startup';
+                            registrationBody = {
+                                companyName: form.querySelector('#company-name').value, yearsInOperation: form.querySelector('#op-years').value,
+                                fleetSize: form.querySelector('#fleet-size').value, serviceArea: form.querySelector('#service-area').value,
+                                email: emailInput.value, password: form.querySelector('input[type="password"]:not([id*="confirm"])').value,
+                            };
+                        } else if (dashboardPage === 'business_dashboard.html') {
+                             registrationEndpoint = '/api/register/business';
+                             registrationBody = {
+                                companyName: form.querySelector('#business-name').value, businessType: form.querySelector('#business-type').value,
+                                companySize: form.querySelector('#company-size').value, monthlyShipments: form.querySelector('#shipment-volume').value,
+                                email: emailInput.value, password: form.querySelector('input[type="password"]:not([id*="confirm"])').value,
+                            };
+                        } else {
+                            registrationEndpoint = '/api/register/customer';
+                             registrationBody = {
+                                fullName: form.querySelector('#signup-name').value, email: emailInput.value,
+                                password: form.querySelector('input[type="password"]:not([id*="confirm"])').value,
+                            };
+                        }
+
+                        const registerResponse = await fetch(`${BACKEND_URL}${registrationEndpoint}`, {
+                             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(registrationBody)
+                        });
+
+                        if (!registerResponse.ok) { const errorData = await registerResponse.json(); throw new Error(errorData.message || 'Registration failed'); }
                         
                         window.location.href = dashboardPage;
 
                     } catch (error) {
-                        // THIS PART IS NEW: More detailed logging
-                        console.error('Fetch Error:', error);
-                        showMessage(messageEl, 'Could not connect to the server. Please check the console for details.', 'error');
+                        console.error('Registration Flow Error:', error);
+                        showMessage(messageEl, `Error: ${error.message}`, 'error');
                         button.disabled = false;
-                        button.textContent = button.textContent.replace('Verifying...', 'Verify');
+                        button.textContent = button.textContent.replace('Verifying...', 'Verify').replace('Registering...', 'Verify');
                     }
                 });
             });
 
-             // --- Login Logic ---
              document.querySelectorAll('form.login-form').forEach(form => {
-                form.addEventListener('submit', (e) => {
+                form.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    // This is a prototype; in a real app, you would verify credentials here.
+                    const button = form.querySelector('button[type="submit"]');
+                    const emailInput = form.querySelector('.email-input');
+                    const passwordInput = form.querySelector('.password-input');
+                    const messageEl = form.closest('.tab-content').querySelector('.message');
                     const dashboardPage = form.dataset.dashboard;
-                    window.location.href = dashboardPage;
+
+                    button.disabled = true; button.textContent = 'Logging In...';
+
+                    let loginEndpoint = '';
+                    if (dashboardPage === 'startup_dashboard.html') loginEndpoint = '/api/login/startup';
+                    else if (dashboardPage === 'business_dashboard.html') loginEndpoint = '/api/login/business';
+                    else loginEndpoint = '/api/login/customer';
+
+                    try {
+                         const response = await fetch(`${BACKEND_URL}${loginEndpoint}`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: emailInput.value, password: passwordInput.value })
+                         });
+                         if (!response.ok) { const data = await response.json(); throw new Error(data.message); }
+                         
+                         window.location.href = dashboardPage;
+
+                    } catch (error) {
+                        console.error('Login Error:', error);
+                        showMessage(messageEl, `Error: ${error.message}`, 'error');
+                    } finally {
+                        button.disabled = false; button.textContent = 'Log In';
+                    }
                 });
              });
 
             function showMessage(element, text, type) {
                 if (!element) return;
-                element.className = 'message';
-                element.classList.add(type);
-                element.textContent = text;
-                element.style.display = 'block';
-                 setTimeout(() => {
-                    element.style.display = 'none';
-                 }, 5000);
+                element.className = 'message'; element.classList.add(type);
+                element.textContent = text; element.style.display = 'block';
+                 setTimeout(() => { element.style.display = 'none'; }, 5000);
             }
         });
     </script>

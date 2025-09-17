@@ -82,6 +82,7 @@
         .status-resolved { background-color: var(--green); }
         .opportunity-panel { grid-column: span 12; background: linear-gradient(45deg, rgba(251, 192, 45, 0.1), rgba(211, 47, 47, 0.1)); border-color: var(--yellow);}
         .opportunity-content { display: flex; justify-content: space-between; align-items: center; }
+        #map { height: 400px; width: 100%; border-radius: 12px; background-color: rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
@@ -129,7 +130,8 @@
 
         <!-- ===== Planner Page ===== -->
         <div id="planner-page" class="page-content">
-            <div class="dashboard-grid">
+             <div class="dashboard-grid">
+                <section class="main-panel" style="grid-column: span 12;"><h2 class="panel-title">Route Visualization</h2><div id="map"></div></section>
                 <section class="main-panel planner-panel">
                     <h2 class="panel-title">New Shipment Planner</h2>
                     <form id="planner-form">
@@ -161,7 +163,6 @@
                     <h2 class="panel-title">LogAi Recommendations</h2>
                     <div id="results-placeholder" class="results-placeholder">
                         <div class="icon">🤖</div><h3>Your AI-powered recommendations will appear here.</h3>
-                        <p>Fill out the detailed form and click generate.</p>
                     </div>
                     <div id="recommendation-wrapper" class="recommendation-wrapper"></div>
                 </section>
@@ -199,14 +200,12 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             
-            // Lighting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
             scene.add(ambientLight);
             const pointLight = new THREE.PointLight(0xffffff, 0.8);
             pointLight.position.set(50, 50, 50);
             scene.add(pointLight);
 
-            // Neptune
             const textureLoader = new THREE.TextureLoader();
             const neptuneTexture = textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/neptunemap.jpg');
             const neptuneMaterial = new THREE.MeshPhongMaterial({ map: neptuneTexture, bumpScale: 0.05, specular: new THREE.Color('grey') });
@@ -215,21 +214,16 @@
             neptune.position.x = -25;
             scene.add(neptune);
 
-            // Stars
             const starGeometry = new THREE.BufferGeometry();
             const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true, opacity: 0.8 });
             const starVertices = [];
             for (let i = 0; i < 10000; i++) {
-                const x = (Math.random() - 0.5) * 2000;
-                const y = (Math.random() - 0.5) * 2000;
-                const z = -Math.random() * 1500;
-                starVertices.push(x, y, z);
+                starVertices.push((Math.random() - 0.5) * 2000, (Math.random() - 0.5) * 2000, -Math.random() * 1500);
             }
             starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
             stars = new THREE.Points(starGeometry, starMaterial);
             scene.add(stars);
 
-            // Asteroid Belt
             asteroidBelt = new THREE.Group();
             const asteroidGeometry = new THREE.IcosahedronGeometry(1, 0);
             const asteroidMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.8 });
@@ -237,10 +231,7 @@
                 const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
                 const angle = Math.random() * Math.PI * 2;
                 const radius = 40 + Math.random() * 40;
-                const x = Math.cos(angle) * radius;
-                const z = Math.sin(angle) * radius;
-                const y = (Math.random() - 0.5) * 8;
-                asteroid.position.set(x, y, z);
+                asteroid.position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 8, Math.sin(angle) * radius);
                 asteroid.scale.setScalar(Math.random() * 0.4 + 0.1);
                 asteroid.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
                 asteroidBelt.add(asteroid);
@@ -419,5 +410,18 @@
             }
         });
     </script>
+    <!-- Google Maps API Script -->
+    <script>
+        let map;
+        function initMap() {
+            const bhopal = { lat: 23.2599, lng: 77.4126 };
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: bhopal,
+                zoom: 5,
+                styles: [ { "elementType": "geometry", "stylers": [ { "color": "#242f3e" } ] }, { "elementType": "labels.text.stroke", "stylers": [ { "color": "#242f3e" } ] }, { "elementType": "labels.text.fill", "stylers": [ { "color": "#746855" } ] }, { "featureType": "administrative.locality", "elementType": "labels.text.fill", "stylers": [ { "color": "#d59563" } ] }, { "featureType": "poi", "elementType": "labels.text.fill", "stylers": [ { "color": "#d59563" } ] }, { "featureType": "poi.park", "elementType": "geometry", "stylers": [ { "color": "#263c3f" } ] }, { "featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [ { "color": "#6b9a76" } ] }, { "featureType": "road", "elementType": "geometry", "stylers": [ { "color": "#38414e" } ] }, { "featureType": "road", "elementType": "geometry.stroke", "stylers": [ { "color": "#212a37" } ] }, { "featureType": "road", "elementType": "labels.text.fill", "stylers": [ { "color": "#9ca5b3" } ] }, { "featureType": "road.highway", "elementType": "geometry", "stylers": [ { "color": "#746855" } ] }, { "featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [ { "color": "#1f2835" } ] }, { "featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [ { "color": "#f3d19c" } ] }, { "featureType": "transit", "elementType": "geometry", "stylers": [ { "color": "#2f3948" } ] }, { "featureType": "transit.station", "elementType": "labels.text.fill", "stylers": [ { "color": "#d59563" } ] }, { "featureType": "water", "elementType": "geometry", "stylers": [ { "color": "#17263c" } ] }, { "featureType": "water", "elementType": "labels.text.fill", "stylers": [ { "color": "#515c6d" } ] }, { "featureType": "water", "elementType": "labels.text.stroke", "stylers": [ { "color": "#17263c" } ] } ]
+            });
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpD4LkB8Wo9v5YQh3v-9vdehUf6JMkTTU" async defer></script>
 </body>
 </html>

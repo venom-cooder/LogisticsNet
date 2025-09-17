@@ -39,8 +39,8 @@
         .btn { display: inline-block; padding: 12px 28px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; color: var(--text-primary); cursor: pointer; text-decoration: none; transition: background-color 0.3s ease; background-color: var(--primary-blue); }
         .btn:hover { background-color: #0088cc; }
         .btn:disabled { background-color: #555; cursor: not-allowed; }
-        .planner-panel { grid-column: span 5; }
-        .results-panel { grid-column: span 7; }
+        .planner-panel { grid-column: span-12; } 
+        .results-panel { grid-column: span 12; } 
         .input-group { margin-bottom: 1.5rem; }
         .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary); }
         .input-group select, .input-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; font-size: 1rem; }
@@ -82,7 +82,9 @@
         .status-resolved { background-color: var(--green); }
         .opportunity-panel { grid-column: span 12; background: linear-gradient(45deg, rgba(251, 192, 45, 0.1), rgba(211, 47, 47, 0.1)); border-color: var(--yellow);}
         .opportunity-content { display: flex; justify-content: space-between; align-items: center; }
-        #map { height: 400px; width: 100%; border-radius: 12px; background-color: rgba(0,0,0,0.3); }
+        #map-container { grid-column: span 12; height: 400px; }
+        #map { height: 100%; border-radius: 12px; background-color: rgba(0,0,0,0.3); }
+        #map-error { display: none; text-align: center; padding: 2rem; color: var(--yellow); }
     </style>
 </head>
 <body>
@@ -131,7 +133,11 @@
         <!-- ===== Planner Page ===== -->
         <div id="planner-page" class="page-content">
              <div class="dashboard-grid">
-                <section class="main-panel" style="grid-column: span 12;"><h2 class="panel-title">Route Visualization</h2><div id="map"></div></section>
+                <section id="map-container" class="main-panel">
+                    <h2 class="panel-title">Route Visualization</h2>
+                    <div id="map"></div>
+                    <div id="map-error"></div>
+                </section>
                 <section class="main-panel planner-panel">
                     <h2 class="panel-title">New Shipment Planner</h2>
                     <form id="planner-form">

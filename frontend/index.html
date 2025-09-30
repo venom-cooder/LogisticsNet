@@ -136,7 +136,7 @@
 
         .hero-content p {
             font-size: clamp(1rem, 2.5vw, 1.25rem);
-            max-width: 600px;
+            max-width: 700px; /* Slightly wider */
             margin: 1.5rem auto 2.5rem;
             color: rgba(255, 255, 255, 0.7);
             line-height: 1.6;
@@ -270,8 +270,8 @@
 
         /* Benefits Section */
         .benefits-grid {
-             display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Updated for 3 columns */
             gap: 2rem;
             text-align: left;
         }
@@ -287,6 +287,7 @@
         }
         .benefit-card ul {
             list-style: none;
+            padding-left: 0;
         }
         .benefit-card li {
             padding-left: 1.5rem;
@@ -350,7 +351,7 @@
             <section class="hero-section">
                 <div class="hero-content">
                     <h1>Logistics, Evolved.</h1>
-                    <p>An intelligent network to Compare, Combine, and Confidently Book your shipments. Welcome to the future of your supply chain.</p>
+                    <p>Our intelligent network, powered by "LogAi," allows you to Compare, Combine, and Confidently Book your shipments, creating a smarter supply chain for a growing India.</p>
                     <a href="#features" class="btn">Explore The Network</a>
                 </div>
                 <div class="scroll-indicator">SCROLL DOWN</div>
@@ -365,13 +366,13 @@
                         <h3>Multi-Provider Itinerary</h3>
                         <p>Our flagship feature. Combine multiple logistics companies in a single, optimized journey for maximum efficiency and cost savings.</p>
                     </div>
+                     <div class="feature-card">
+                        <h3>Hyper-local & Intra-city Optimization</h3>
+                        <p>Our AI finds the smartest routes for deliveries within your city, reducing the number of half-empty trucks and easing traffic congestion.</p>
+                    </div>
                     <div class="feature-card">
                         <h3>Trust Facilitator Model</h3>
                         <p>We promote innovative startups by verifying their self-backed guarantees, creating a low-risk, high-trust ecosystem for all.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h3>Data-Driven Intelligence</h3>
-                        <p>Our platform learns the best routes and providers over time, offering smarter, AI-powered suggestions for your shipments.</p>
                     </div>
                 </div>
             </section>
@@ -422,6 +423,15 @@
                             <li>Get qualified leads and grow your business.</li>
                         </ul>
                     </div>
+                     <div class="benefit-card">
+                        <h3>For the City & Environment</h3>
+                        <ul>
+                            <li>Reduces traffic and pollution by optimizing intra-city routes.</li>
+                            <li>Optimizes warehouse usage across the city.</li>
+                            <li>Conserves fuel and time with efficient delivery paths.</li>
+                            <li>Strengthens the local economy by empowering entrepreneurs.</li>
+                        </ul>
+                    </div>
                 </div>
             </section>
 
@@ -465,9 +475,9 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
             // --- Lighting ---
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Softer ambient light
             scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0); // Softer directional light
             directionalLight.position.set(10, 5, 15);
             scene.add(directionalLight);
             
@@ -496,18 +506,16 @@
                 map: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthmap1k.jpg'),
                 bumpMap: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthbump1k.jpg'),
                 bumpScale: 0.05,
-                specularMap: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthspec1k.jpg'),
-                specular: new THREE.Color('grey'),
+                specular: new THREE.Color('#333333'),
             });
             globe = new THREE.Mesh(new THREE.SphereGeometry(globeRadius, 64, 64), globeMaterial);
             scene.add(globe);
 
-            // CORRECTED AND SIMPLIFIED CLOUDS
             const cloudMaterial = new THREE.MeshPhongMaterial({
                 map: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthcloudmap.png'),
+                alphaMap: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/earthspec1k.jpg'),
                 transparent: true,
-                opacity: 0.4, // A soft, visible opacity
-                blending: THREE.AdditiveBlending
+                opacity: 0.8
             });
             clouds = new THREE.Mesh(new THREE.SphereGeometry(globeRadius + 0.15, 64, 64), cloudMaterial);
             scene.add(clouds);
@@ -597,3 +605,4 @@
     </script>
 </body>
 </html>
+

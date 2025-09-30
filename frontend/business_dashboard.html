@@ -39,8 +39,8 @@
         .btn { display: inline-block; padding: 12px 28px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; color: var(--text-primary); cursor: pointer; text-decoration: none; transition: background-color 0.3s ease; background-color: var(--primary-blue); }
         .btn:hover { background-color: #0088cc; }
         .btn:disabled { background-color: #555; cursor: not-allowed; }
-        .planner-panel { grid-column: span-12; } 
-        .results-panel { grid-column: span 12; } 
+        .planner-panel { grid-column: span 5; }
+        .results-panel { grid-column: span 7; }
         .input-group { margin-bottom: 1.5rem; }
         .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary); }
         .input-group select, .input-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; font-size: 1rem; }
@@ -82,9 +82,13 @@
         .status-resolved { background-color: var(--green); }
         .opportunity-panel { grid-column: span 12; background: linear-gradient(45deg, rgba(251, 192, 45, 0.1), rgba(211, 47, 47, 0.1)); border-color: var(--yellow);}
         .opportunity-content { display: flex; justify-content: space-between; align-items: center; }
-        #map-container { grid-column: span 12; height: 400px; }
-        #map { height: 100%; border-radius: 12px; background-color: rgba(0,0,0,0.3); }
-        #map-error { display: none; text-align: center; padding: 2rem; color: var(--yellow); }
+        #map-container { grid-column: span 12; }
+        #pseudo-map { position: relative; width: 100%; height: 400px; background: rgba(0,0,0,0.4); border-radius: 12px; border: 1px solid var(--border-color); display: none; }
+        .location-point { position: absolute; width: 15px; height: 15px; background: var(--primary-blue); border-radius: 50%; border: 2px solid white; transform: translate(-50%, -50%); }
+        .location-label { position: absolute; color: white; font-size: 12px; transform: translate(-50%, 15px); font-weight: bold; }
+        #pseudo-map svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #pseudo-map svg line { stroke: var(--yellow); stroke-width: 2; stroke-dasharray: 5, 5; animation: dash 1s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: 100; } }
     </style>
 </head>
 <body>
@@ -111,9 +115,11 @@
                 <section class="main-panel panel-monthly-spend"><h2 class="panel-title">Monthly Logistics Spend</h2><canvas id="monthlySpendChart"></canvas></section>
                 <section class="main-panel panel-ongoing-shipments">
                      <h2 class="panel-title">Ongoing Shipments</h2>
-                      <table style="width:100%; border-collapse: collapse;"><tbody>
-                            <tr><td style="padding:1rem;">#B-124</td><td><img src="https://logo.clearbit.com/safexpress.com" style="height:25px; vertical-align:middle;" onerror="this.style.display='none'"> SafeStore</td><td>Bhopal to Jabalpur</td><td>In Transit</td></tr>
-                            <tr><td style="padding:1rem;">#B-123</td><td><img src="https://logo.clearbit.com/dhl.com" style="height:25px; vertical-align:middle;" onerror="this.style.display='none'"> DHL</td><td>Delhi to Mumbai</td><td>Out for Delivery</td></tr>
+                      <table class="data-table">
+                          <thead><tr><th>ID</th><th>Partner</th><th>Route</th><th>Status</th></tr></thead>
+                          <tbody>
+                            <tr><td>#B-124</td><td><img src="https://logo.clearbit.com/safexpress.com" style="height:25px; vertical-align:middle; border-radius: 4px;" > SafeStore</td><td>Bhopal to Jabalpur</td><td><span class="status-tag status-in-transit">In Transit</span></td></tr>
+                            <tr><td>#B-123</td><td><img src="https://logo.clearbit.com/dhl.com" style="height:25px; vertical-align:middle; border-radius: 4px;" > DHL</td><td>Delhi to Mumbai</td><td><span class="status-tag status-completed">Delivered</span></td></tr>
                       </tbody></table>
                 </section>
                 <section class="main-panel opportunity-panel">
@@ -132,11 +138,10 @@
 
         <!-- ===== Planner Page ===== -->
         <div id="planner-page" class="page-content">
-             <div class="dashboard-grid">
-                <section id="map-container" class="main-panel">
+            <div class="dashboard-grid">
+                 <section id="map-container" class="main-panel">
                     <h2 class="panel-title">Route Visualization</h2>
-                    <div id="map"></div>
-                    <div id="map-error"></div>
+                    <div id="pseudo-map"></div>
                 </section>
                 <section class="main-panel planner-panel">
                     <h2 class="panel-title">New Shipment Planner</h2>
@@ -144,7 +149,7 @@
                         <div class="input-group"><label>1. Define Route</label>
                             <div class="waypoint-group"><input type="text" value="Bhopal" disabled></div>
                             <div id="waypoints-container"></div>
-                            <button type="button" id="add-waypoint-btn" class="btn btn-secondary" style="width: auto; padding: 8px 16px; font-size: 0.9rem;">+ Add Waypoint/Destination</button>
+                            <button type="button" id="add-waypoint-btn" class="btn" style="background-color: #555; width: auto; padding: 8px 16px; font-size: 0.9rem;">+ Add Waypoint/Destination</button>
                         </div>
                         <div class="input-group"><label>2. What is your business type?</label><select id="business-type"><option>General Goods</option><option>Electronics</option><option>Pharma</option><option>Manufacturing</option><option>Textiles</option></select></div>
                         <div class="input-group"><label>3. How fragile are the goods?</label><select id="fragility"><option>Low</option><option>Medium</option><option>High</option></select></div>
@@ -244,17 +249,21 @@
             }
             scene.add(asteroidBelt);
 
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', onMouseMove);
             animate3D();
         }
         
         const clock = new THREE.Clock();
         let mouseX = 0;
-        document.addEventListener('mousemove', (event) => { mouseX = (event.clientX / window.innerWidth) * 2 - 1; });
+        
+        function onMouseMove(event) { mouseX = (event.clientX / window.innerWidth) * 2 - 1; }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
 
         function animate3D() {
             requestAnimationFrame(animate3D);
@@ -349,6 +358,8 @@
                 if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error || 'Failed to get a recommendation.'); }
                 const recs = await response.json();
                 displayRecommendations(recs, selectedPriorities);
+                const fullRoute = ["Bhopal", ...waypoints];
+                drawPseudoMap(fullRoute);
             } catch (error) {
                 console.error("API Call failed:", error);
                 wrapper.innerHTML = `<div class="results-placeholder" style="color: var(--red);"><h3>Error</h3><p>${error.message}</p></div>`;
@@ -395,7 +406,6 @@
             wrapper.style.display = 'block';
         }
 
-        // "Find a Better Partner" button logic
         document.getElementById('find-partner-btn').addEventListener('click', () => {
             navLinks.forEach(l => l.classList.remove('active'));
             document.querySelector('a[data-page="planner"]').classList.add('active');
@@ -415,19 +425,69 @@
                 safetyCard.classList.add('active');
             }
         });
-    </script>
-    <!-- Google Maps API Script -->
-    <script>
-        let map;
-        function initMap() {
-            const bhopal = { lat: 23.2599, lng: 77.4126 };
-            map = new google.maps.Map(document.getElementById("map"), {
-                center: bhopal,
-                zoom: 5,
-                styles: [ { "elementType": "geometry", "stylers": [ { "color": "#242f3e" } ] }, { "elementType": "labels.text.stroke", "stylers": [ { "color": "#242f3e" } ] }, { "elementType": "labels.text.fill", "stylers": [ { "color": "#746855" } ] }, { "featureType": "administrative.locality", "elementType": "labels.text.fill", "stylers": [ { "color": "#d59563" } ] }, { "featureType": "poi", "elementType": "labels.text.fill", "stylers": [ { "color": "#d59563" } ] }, { "featureType": "poi.park", "elementType": "geometry", "stylers": [ { "color": "#263c3f" } ] }, { "featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [ { "color": "#6b9a76" } ] }, { "featureType": "road", "elementType": "geometry", "stylers": [ { "color": "#38414e" } ] }, { "featureType": "road", "elementType": "geometry.stroke", "stylers": [ { "color": "#212a37" } ] }, { "featureType": "road", "elementType": "labels.text.fill", "stylers": [ { "color": "#9ca5b3" } ] }, { "featureType": "road.highway", "elementType": "geometry", "stylers": [ { "color": "#746855" } ] }, { "featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [ { "color": "#1f2835" } ] }, { "featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [ { "color": "#f3d19c" } ] }, { "featureType": "transit", "elementType": "geometry", "stylers": [ { "color": "#2f3948" } ] }, { "featureType": "transit.station", "elementType": "labels.text.fill", "stylers": [ { "color": "#d59563" } ] }, { "featureType": "water", "elementType": "geometry", "stylers": [ { "color": "#17263c" } ] }, { "featureType": "water", "elementType": "labels.text.fill", "stylers": [ { "color": "#515c6d" } ] }, { "featureType": "water", "elementType": "labels.text.stroke", "stylers": [ { "color": "#17263c" } ] } ]
+
+        const pseudoMap = document.getElementById('pseudo-map');
+        const CITY_COORDINATES = {
+            "Bhopal": {x: 0, y: 0}, "Indore": {x: -20, y: -5}, "Delhi": {x: 5, y: 80},
+            "Pune": {x: -30, y: -60}, "Ahmedabad": {x: -70, y: -10}, "Kolkata": {x: 90, y: 10}
+        };
+
+        function drawPseudoMap(route) {
+            pseudoMap.innerHTML = '';
+            pseudoMap.style.display = 'block';
+            
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            const points = [];
+
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            route.forEach(locName => {
+                if (CITY_COORDINATES[locName]) {
+                    minX = Math.min(minX, CITY_COORDINATES[locName].x);
+                    maxX = Math.max(maxX, CITY_COORDINATES[locName].x);
+                    minY = Math.min(minY, CITY_COORDINATES[locName].y);
+                    maxY = Math.max(maxY, CITY_COORDINATES[locName].y);
+                }
             });
+
+            const mapWidth = pseudoMap.clientWidth;
+            const mapHeight = pseudoMap.clientHeight;
+            const padding = 40;
+
+            const scaleX = (mapWidth - 2 * padding) / (maxX - minX || 1);
+            const scaleY = (mapHeight - 2 * padding) / (maxY - minY || 1);
+
+            route.forEach(locName => {
+                if (!CITY_COORDINATES[locName]) return;
+
+                const x = (CITY_COORDINATES[locName].x - minX) * scaleX + padding;
+                const y = mapHeight - ((CITY_COORDINATES[locName].y - minY) * scaleY + padding);
+                points.push({x, y});
+
+                const pointDiv = document.createElement('div');
+                pointDiv.className = 'location-point';
+                pointDiv.style.left = `${x}px`;
+                pointDiv.style.top = `${y}px`;
+
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'location-label';
+                labelDiv.textContent = locName;
+                labelDiv.style.left = `${x}px`;
+                labelDiv.style.top = `${y}px`;
+
+                pseudoMap.appendChild(pointDiv);
+                pseudoMap.appendChild(labelDiv);
+            });
+
+            for(let i = 0; i < points.length - 1; i++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', points[i].x);
+                line.setAttribute('y1', points[i].y);
+                line.setAttribute('x2', points[i+1].x);
+                line.setAttribute('y2', points[i+1].y);
+                svg.appendChild(line);
+            }
+            pseudoMap.appendChild(svg);
         }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpD4LkB8Wo9v5YQh3v-9vdehUf6JMkTTU" ></script>
 </body>
 </html>

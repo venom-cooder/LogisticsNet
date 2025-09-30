@@ -324,31 +324,30 @@
             </div>
             <div class="role-selection-grid">
                 <div class="role-card" data-form="startup-form">
-                    <div class="role-icon">🚚</div>
+                    <div class="role-icon">🚀</div>
                     <h3>Logistics Startup</h3>
-                    <p>Register your company to reach a new market of customers.</p>
+                    <p>Register your company to serve a national market of customers.</p>
                 </div>
                 <div class="role-card" data-form="business-form">
                     <div class="role-icon">🏢</div>
                     <h3>Business User</h3>
                     <p>Optimize your supply chain, save costs, and manage shipments.</p>
                 </div>
-                <div class="role-card" data-form="customer-form">
-                    <div class="role-icon">📦</div>
-                    <h3>Personal Shipment</h3>
-                    <p>Send items locally with our free peer-to-peer vendor connection.</p>
+                <div class="role-card" data-form="intracity-form">
+                    <div class="role-icon">🏙️</div>
+                    <h3>Intra-City Partner</h3>
+                    <p>Register your vehicle to handle hyper-local deliveries within your city.</p>
                 </div>
             </div>
         </div>
 
         <!-- Startup Form Panel -->
         <div id="startup-form" class="panel form-panel">
-            <button class="back-button js-back-to-roles">←</button>
+             <button class="back-button js-back-to-roles">←</button>
             <div class="tabs">
                 <button class="tab-button active" data-tab="signup">Sign Up</button>
                 <button class="tab-button" data-tab="login">Log In</button>
             </div>
-            <!-- Startup Signup Content -->
             <div class="tab-content active" data-tab-content="signup">
                 <div class="panel-header"><h1>Register Your Startup</h1></div>
                 <div class="message"></div>
@@ -375,9 +374,8 @@
                      </div>
                 </form>
             </div>
-             <!-- Startup Login Content -->
             <div class="tab-content" data-tab-content="login">
-                <div class="panel-header"><h1>Startup Login</h1></div>
+                <div class="panel-header"><h1>Partner Login</h1></div>
                 <div class="message"></div>
                 <form class="login-form" data-dashboard="startup_dashboard.html">
                      <div class="input-group"><label for="startup-email-login">Email</label><input type="email" id="startup-email-login" class="email-input" required></div>
@@ -394,7 +392,6 @@
                 <button class="tab-button active" data-tab="signup">Sign Up</button>
                 <button class="tab-button" data-tab="login">Log In</button>
             </div>
-             <!-- Business Signup Content -->
             <div class="tab-content active" data-tab-content="signup">
                 <div class="panel-header"><h1>Business User Signup</h1></div>
                 <div class="message"></div>
@@ -421,7 +418,6 @@
                      </div>
                 </form>
             </div>
-             <!-- Business Login Content -->
             <div class="tab-content" data-tab-content="login">
                  <div class="panel-header"><h1>Business Login</h1></div>
                  <div class="message"></div>
@@ -433,39 +429,42 @@
             </div>
         </div>
         
-        <!-- Customer Form Panel -->
-        <div id="customer-form" class="panel form-panel">
+        <!-- NEW: Intra-City Partner Form Panel -->
+        <div id="intracity-form" class="panel form-panel">
             <button class="back-button js-back-to-roles">←</button>
             <div class="tabs">
-                <button class="tab-button active" data-tab="login">Log In</button>
-                <button class="tab-button" data-tab="signup">Sign Up</button>
+                <button class="tab-button active" data-tab="signup">Sign Up</button>
+                <button class="tab-button" data-tab="login">Log In</button>
             </div>
-             <!-- Customer Login Content -->
-            <div class="tab-content active" data-tab-content="login">
-                <div class="panel-header"><h1>Welcome Back</h1></div>
+            <div class="tab-content active" data-tab-content="signup">
+                <div class="panel-header"><h1>Register as an Intra-City Partner</h1></div>
                 <div class="message"></div>
-                <form class="login-form" data-dashboard="personal_dashboard.html">
-                    <div class="input-group"><label for="login-email">Email</label><input type="email" id="login-email" class="email-input" required></div>
-                    <div class="input-group"><label for="login-password">Password</label><input type="password" id="login-password" class="password-input" required></div>
-                    <button type="submit" class="btn">Log In</button>
-                </form>
-            </div>
-             <!-- Customer Signup Content -->
-            <div class="tab-content" data-tab-content="signup">
-                <div class="panel-header"><h1>Create Account</h1></div>
-                <div class="message"></div>
-                <form class="signup-form" data-dashboard="personal_dashboard.html">
+                <form class="signup-form" data-dashboard="intracity_dashboard.html"> 
                     <div class="form-step active" data-step="1">
-                        <div class="input-group"><label for="signup-name">Full Name</label><input type="text" id="signup-name" required></div>
-                        <div class="input-group"><label for="signup-email">Email</label><input type="email" class="email-input" id="signup-email" required></div>
-                         <div class="input-group"><label for="signup-password">Create Password</label><input type="password" class="password-input" id="signup-password" required></div>
-                        <div class="input-group"><label for="signup-password-confirm">Confirm Password</label><input type="password" class="confirm-password-input" id="signup-password-confirm" required></div>
-                        <button type="button" class="btn js-send-otp">Send OTP</button>
+                        <div class="input-group"><label for="intracity-name">Your Name / Company Name</label><input type="text" id="intracity-name" required></div>
+                        <div class="input-group"><label for="intracity-vehicle">Vehicle Type</label><input type="text" id="intracity-vehicle" placeholder="e.g., Tata Ace, Bike, 3-Wheeler" required></div>
+                        <div class="input-group"><label for="intracity-city">City of Operation</label><input type="text" id="intracity-city" placeholder="e.g., Mumbai, Bhopal" required></div>
+                        <button type="button" class="btn js-next-step">Next</button>
                     </div>
                     <div class="form-step" data-step="2">
-                         <div class="input-group"><label for="customer-otp">Verification Code</label><input type="text" id="customer-otp" required placeholder="Enter 6-digit OTP"></div>
-                        <button type="submit" class="btn">Verify & Create Account</button>
+                        <div class="input-group"><label for="intracity-email-signup">Email</label><input type="email" class="email-input" id="intracity-email-signup" required></div>
+                        <div class="input-group"><label for="intracity-password-signup">Create Password</label><input type="password" class="password-input" id="intracity-password-signup" required></div>
+                        <div class="input-group"><label for="intracity-password-confirm">Confirm Password</label><input type="password" class="confirm-password-input" id="intracity-password-confirm" required></div>
+                        <div class="button-group"><button type="button" class="btn btn-secondary js-prev-step">Back</button><button type="button" class="btn js-send-otp">Send OTP</button></div>
                     </div>
+                     <div class="form-step" data-step="3">
+                         <div class="input-group"><label for="intracity-otp">Verification Code</label><input type="text" id="intracity-otp" required placeholder="Enter 6-digit OTP"></div>
+                        <button type="submit" class="btn">Verify & Register</button>
+                     </div>
+                </form>
+            </div>
+            <div class="tab-content" data-tab-content="login">
+                <div class="panel-header"><h1>Partner Login</h1></div>
+                <div class="message"></div>
+                <form class="login-form" data-dashboard="intracity_dashboard.html">
+                     <div class="input-group"><label for="intracity-email-login">Email</label><input type="email" id="intracity-email-login" class="email-input" required></div>
+                    <div class="input-group"><label for="intracity-password-login">Password</label><input type="password" id="intracity-password-login" class="password-input" required></div>
+                    <button type="submit" class="btn">Log In</button>
                 </form>
             </div>
         </div>
@@ -498,7 +497,6 @@
             directionalLight.position.set(15, 10, 5);
             scene.add(directionalLight);
             
-            // Jupiter
             const jupiterMaterial = new THREE.MeshPhongMaterial({
                 map: textureLoader.load('https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/jupitermap.jpg'),
             });
@@ -507,7 +505,6 @@
             jupiter.rotation.z = 0.1;
             scene.add(jupiter);
 
-            // Stars
             const starGeometry = new THREE.BufferGeometry();
             const starVertices = [];
             for (let i = 0; i < 10000; i++) {
@@ -517,7 +514,6 @@
             stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0xffffff, size: 0.15 }));
             scene.add(stars);
 
-            // Asteroids
             asteroidBelt = new THREE.Group();
             const asteroidGeometry = new THREE.IcosahedronGeometry(1, 0);
             const asteroidMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.8 });
@@ -623,8 +619,8 @@
                     const form = e.target.closest('form');
                     const emailInput = form.querySelector('.email-input');
                     const messageEl = form.closest('.tab-content').querySelector('.message');
-                    const passInput = form.querySelector('input[type="password"]:not([id*="confirm"])');
-                    const confirmPassInput = form.querySelector('input[id*="confirm"]');
+                    const passInput = form.querySelector('.password-input');
+                    const confirmPassInput = form.querySelector('.confirm-password-input');
 
                     if(passInput.value !== confirmPassInput.value) { return showMessage(messageEl, 'Passwords do not match.', 'error'); }
                     if(passInput.value.length < 6) { return showMessage(messageEl, 'Password must be at least 6 characters.', 'error'); }
@@ -664,30 +660,34 @@
                         });
                         if (!verifyResponse.ok) { const data = await verifyResponse.json(); throw new Error(data.message); }
 
-                        // OTP Verified, now register the user
                         button.textContent = 'Registering...';
                         
-                        let registrationEndpoint = ''; let registrationBody = {};
+                        let registrationEndpoint = ''; 
+                        let registrationBody = {};
+                        const formPanel = form.closest('.form-panel');
                         
-                        if (dashboardPage === 'startup_dashboard.html') {
+                        if (formPanel.id === 'startup-form') {
                             registrationEndpoint = '/api/register/startup';
                             registrationBody = {
                                 companyName: form.querySelector('#company-name').value, yearsInOperation: form.querySelector('#op-years').value,
                                 fleetSize: form.querySelector('#fleet-size').value, serviceArea: form.querySelector('#service-area').value,
-                                email: emailInput.value, password: form.querySelector('input[type="password"]:not([id*="confirm"])').value,
+                                email: emailInput.value, password: form.querySelector('.password-input').value,
                             };
-                        } else if (dashboardPage === 'business_dashboard.html') {
+                        } else if (formPanel.id === 'business-form') {
                              registrationEndpoint = '/api/register/business';
                              registrationBody = {
                                 companyName: form.querySelector('#business-name').value, businessType: form.querySelector('#business-type').value,
                                 companySize: form.querySelector('#company-size').value, monthlyShipments: form.querySelector('#shipment-volume').value,
-                                email: emailInput.value, password: form.querySelector('input[type="password"]:not([id*="confirm"])').value,
+                                email: emailInput.value, password: form.querySelector('.password-input').value,
                             };
-                        } else {
-                            registrationEndpoint = '/api/register/customer';
-                             registrationBody = {
-                                fullName: form.querySelector('#signup-name').value, email: emailInput.value,
-                                password: form.querySelector('input[type="password"]:not([id*="confirm"])').value,
+                        } else if (formPanel.id === 'intracity-form') {
+                            registrationEndpoint = '/api/register/intracity';
+                            registrationBody = {
+                                companyName: form.querySelector('#intracity-name').value,
+                                vehicleType: form.querySelector('#intracity-vehicle').value,
+                                cityOfOperation: form.querySelector('#intracity-city').value,
+                                email: emailInput.value,
+                                password: form.querySelector('.password-input').value,
                             };
                         }
 
@@ -718,11 +718,14 @@
                     const dashboardPage = form.dataset.dashboard;
 
                     button.disabled = true; button.textContent = 'Logging In...';
-
+                    
                     let loginEndpoint = '';
-                    if (dashboardPage === 'startup_dashboard.html') loginEndpoint = '/api/login/startup';
-                    else if (dashboardPage === 'business_dashboard.html') loginEndpoint = '/api/login/business';
-                    else loginEndpoint = '/api/login/customer';
+                    const formPanel = form.closest('.form-panel');
+
+                    if (formPanel.id === 'startup-form') loginEndpoint = '/api/login/startup';
+                    else if (formPanel.id === 'business-form') loginEndpoint = '/api/login/business';
+                    else if (formPanel.id === 'intracity-form') loginEndpoint = '/api/login/intracity';
+
 
                     try {
                          const response = await fetch(`${BACKEND_URL}${loginEndpoint}`, {
@@ -745,8 +748,11 @@
             function showMessage(element, text, type) {
                 if (!element) return;
                 element.className = 'message'; element.classList.add(type);
-                element.textContent = text; element.style.display = 'block';
-                 setTimeout(() => { element.style.display = 'none'; }, 5000);
+                element.textContent = text;
+                element.style.display = 'block';
+                 setTimeout(() => {
+                    element.style.display = 'none';
+                 }, 5000);
             }
         });
     </script>

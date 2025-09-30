@@ -30,7 +30,7 @@ const MONGO_URI = process.env.MONGO_URI;
 const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASS } });
 
 // CORS Configuration: This is a critical security step. It tells our backend to ONLY accept
-// requests from our live frontend website on Vercel.
+// requests from our live frontend website.
 const corsOptions = { origin: process.env.FRONTEND_URL || 'https://logistics-net.vercel.app' };
 app.use(cors(corsOptions));
 
@@ -92,7 +92,6 @@ app.get('/api/company/:companyName', (req, res) => {
 // B. AI Recommendation Route
 app.post('/api/recommend', (req, res) => {
     const { origin, destination, priorities, fragility } = req.body;
-    // Spawns a separate Python process to run the AI model.
     const pythonProcess = spawn('python3', [ 'predict_api.py', origin, destination, priorities.join(','), fragility ]);
     let pythonResponse = '', errorResponse = '';
     pythonProcess.stdout.on('data', (data) => { pythonResponse += data.toString(); });
@@ -119,7 +118,14 @@ app.post('/api/send-otp', async (req, res) => {
     const mailOptions = { from: `"Logistics Net" <${process.env.GMAIL_USER}>`, to: email, subject: 'Your Verification Code', text: `Your OTP for Logistics Net is: ${otp}.` };
     await transporter.sendMail(mailOptions);
     res.status(200).json({ message: 'OTP sent successfully.' });
-  } catch (error) { res.status(500).json({ message: 'Failed to send OTP.' }); }
+  } catch (error) { 
+    // NEW: Enhanced error logging for debugging on Render
+    console.error('--- OTP SENDING FAILED ---');
+    console.error('Time:', new Date().toISOString());
+    console.error('Error Details:', error);
+    console.error('--- END OF ERROR ---');
+    res.status(500).json({ message: 'Failed to send OTP. Check server logs for details.' }); 
+  }
 });
 
 // Handles verifying an OTP submitted by a user.
@@ -158,15 +164,11 @@ async function loginUser(Model, req, res) {
 }
 
 // --- Specific Registration Endpoints ---
-// Each of these routes calls the same generic 'registerUser' function,
-// but passes in the correct Model (Startup, Business, or IntraCity).
 app.post('/api/register/startup', (req, res) => registerUser(Startup, req.body, res));
 app.post('/api/register/business', (req, res) => registerUser(Business, req.body, res));
 app.post('/api/register/intracity', (req, res) => registerUser(IntraCity, req.body, res));
 
 // --- Specific Login Endpoints ---
-// Each of these routes calls the same generic 'loginUser' function,
-// but passes in the correct Model to check against.
 app.post('/api/login/startup', (req, res) => loginUser(Startup, req, res));
 app.post('/api/login/business', (req, res) => loginUser(Business, req, res));
 app.post('/api/login/intracity', (req, res) => loginUser(IntraCity, req, res));
@@ -176,3 +178,4 @@ app.post('/api/login/intracity', (req, res) => loginUser(IntraCity, req, res));
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+

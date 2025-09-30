@@ -635,7 +635,7 @@
                         navigateStep(e.target, 1);
                     } catch (error) {
                         console.error('Fetch Error:', error);
-                        showMessage(messageEl, 'Could not connect to the server.', 'error');
+                        showMessage(messageEl, 'Could not connect to the server. ' + error.message, 'error');
                     } finally {
                         button.disabled = false; button.textContent = 'Send OTP';
                     }

@@ -450,13 +450,11 @@
                         <div class="input-group"><label for="intracity-email-signup">Email</label><input type="email" class="email-input" id="intracity-email-signup" required></div>
                         <div class="input-group"><label for="intracity-password-signup">Create Password</label><input type="password" class="password-input" id="intracity-password-signup" required></div>
                         <div class="input-group"><label for="intracity-password-confirm">Confirm Password</label><input type="password" class="confirm-password-input" id="intracity-password-confirm" required></div>
-                        <button type="button" class="btn btn-secondary js-prev-step">Back</button>
-                        <!-- NOTE: OTP is bypassed for this form for now, it just goes to the next step -->
-                        <button type="button" class="btn js-next-step">Continue</button>
+                        <div class="button-group"><button type="button" class="btn btn-secondary js-prev-step">Back</button><button type="button" class="btn js-send-otp">Send OTP</button></div>
                     </div>
                      <div class="form-step" data-step="3">
-                        <p style="text-align:center; color: var(--text-secondary); margin-bottom: 1rem;">Click below to complete your registration.</p>
-                        <button type="submit" class="btn">Complete Registration</button>
+                         <div class="input-group"><label for="intracity-otp">Verification Code</label><input type="text" id="intracity-otp" required placeholder="Enter 6-digit OTP"></div>
+                        <button type="submit" class="btn">Verify & Register</button>
                      </div>
                 </form>
             </div>
@@ -616,29 +614,49 @@
                 }
             });
 
-            // --- Send OTP logic for Startup and Business only ---
-            document.querySelectorAll('#startup-form .js-send-otp, #business-form .js-send-otp').forEach(button => {
+            document.querySelectorAll('.js-send-otp').forEach(button => {
                 button.addEventListener('click', async (e) => {
                     const form = e.target.closest('form');
-                    // ... (rest of the OTP logic remains the same for these forms)
+                    const emailInput = form.querySelector('.email-input');
+                    const messageEl = form.closest('.tab-content').querySelector('.message');
+                    const passInput = form.querySelector('.password-input');
+                    const confirmPassInput = form.querySelector('.confirm-password-input');
+
+                    if(passInput.value !== confirmPassInput.value) { return showMessage(messageEl, 'Passwords do not match.', 'error'); }
+                    if(passInput.value.length < 6) { return showMessage(messageEl, 'Password must be at least 6 characters.', 'error'); }
+
+                    button.disabled = true; button.textContent = 'Sending...';
+                    
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/send-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput.value }) });
+                        if (!response.ok) { 
+                            const errorData = await response.json().catch(() => ({ message: 'Failed to send OTP and could not parse error response from server.' }));
+                            throw new Error(errorData.message);
+                        }
+                        const data = await response.json();
+                        showMessage(messageEl, data.message, 'success');
+                        navigateStep(e.target, 1);
+                    } catch (error) {
+                        console.error('Fetch Error:', error);
+                        showMessage(messageEl, `Could not connect to the server. ${error.message}`, 'error');
+                    } finally {
+                        button.disabled = false; button.textContent = 'Send OTP';
+                    }
                 });
             });
 
-            // --- Sign Up Form Logic ---
             document.querySelectorAll('form.signup-form').forEach(form => {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const formPanel = form.closest('.form-panel');
                     const dashboardPage = form.dataset.dashboard;
 
-                    // --- BYPASS for INTRA-CITY ---
                     if (formPanel.id === 'intracity-form') {
                         console.log("Intra-city signup submitted. Bypassing backend for demo.");
                         window.location.href = dashboardPage;
-                        return; // Stop execution here for this form
+                        return;
                     }
                     
-                    // --- Live Authentication for OTHER forms ---
                     const button = form.querySelector('button[type="submit"]');
                     const emailInput = form.querySelector('.email-input');
                     const otpInput = form.querySelector('input[id*="otp"]');
@@ -646,32 +664,89 @@
                     button.disabled = true; button.textContent = 'Verifying...';
 
                     try {
-                        // ... (the existing, full signup logic for startup and business)
+                        const verifyResponse = await fetch(`${BACKEND_URL}/api/verify-otp`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: emailInput.value, otp: otpInput.value })
+                        });
+                        if (!verifyResponse.ok) { const data = await verifyResponse.json(); throw new Error(data.message); }
+
+                        button.textContent = 'Registering...';
+                        
+                        let registrationEndpoint = ''; 
+                        let registrationBody = {};
+                        
+                        if (formPanel.id === 'startup-form') {
+                            registrationEndpoint = '/api/register/startup';
+                            registrationBody = {
+                                companyName: form.querySelector('#company-name').value, yearsInOperation: form.querySelector('#op-years').value,
+                                fleetSize: form.querySelector('#fleet-size').value, serviceArea: form.querySelector('#service-area').value,
+                                email: emailInput.value, password: form.querySelector('.password-input').value,
+                            };
+                        } else if (formPanel.id === 'business-form') {
+                             registrationEndpoint = '/api/register/business';
+                             registrationBody = {
+                                companyName: form.querySelector('#business-name').value, businessType: form.querySelector('#business-type').value,
+                                companySize: form.querySelector('#company-size').value, monthlyShipments: form.querySelector('#shipment-volume').value,
+                                email: emailInput.value, password: form.querySelector('.password-input').value,
+                            };
+                        }
+
+                        const registerResponse = await fetch(`${BACKEND_URL}${registrationEndpoint}`, {
+                             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(registrationBody)
+                        });
+
+                        if (!registerResponse.ok) { const errorData = await registerResponse.json(); throw new Error(errorData.message || 'Registration failed'); }
+                        
+                        window.location.href = dashboardPage;
+
                     } catch (error) {
-                        // ...
-                    } finally {
-                        // ...
+                        console.error('Registration Flow Error:', error);
+                        showMessage(messageEl, `Error: ${error.message}`, 'error');
+                        button.disabled = false;
+                        button.textContent = 'Verify & Register';
                     }
                 });
             });
 
-            // --- Login Form Logic ---
              document.querySelectorAll('form.login-form').forEach(form => {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const formPanel = form.closest('.form-panel');
                     const dashboardPage = form.dataset.dashboard;
 
-                    // --- BYPASS for INTRA-CITY ---
                     if (formPanel.id === 'intracity-form') {
                         console.log("Intra-city login submitted. Bypassing backend for demo.");
                         window.location.href = dashboardPage;
-                        return; // Stop execution here for this form
+                        return;
                     }
-
-                    // --- Live Authentication for OTHER forms ---
+                    
                     const button = form.querySelector('button[type="submit"]');
-                    // ... (the existing, full login logic for startup and business)
+                    const emailInput = form.querySelector('.email-input');
+                    const passwordInput = form.querySelector('.password-input');
+                    const messageEl = form.closest('.tab-content').querySelector('.message');
+
+                    button.disabled = true; button.textContent = 'Logging In...';
+                    
+                    let loginEndpoint = '';
+
+                    if (formPanel.id === 'startup-form') loginEndpoint = '/api/login/startup';
+                    else if (formPanel.id === 'business-form') loginEndpoint = '/api/login/business';
+
+                    try {
+                         const response = await fetch(`${BACKEND_URL}${loginEndpoint}`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: emailInput.value, password: passwordInput.value })
+                         });
+                         if (!response.ok) { const data = await response.json(); throw new Error(data.message); }
+                         
+                         window.location.href = dashboardPage;
+
+                    } catch (error) {
+                        console.error('Login Error:', error);
+                        showMessage(messageEl, `Error: ${error.message}`, 'error');
+                    } finally {
+                        button.disabled = false; button.textContent = 'Log In';
+                    }
                 });
              });
 
